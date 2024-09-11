@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files\Structures">
+      <UniqueIdentifier>{7d072e1d-e884-486e-bcdb-a3954e358099}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Data">
+      <UniqueIdentifier>{c3ad3618-866b-4f7e-985c-2029b9c2df31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Memory">
+      <UniqueIdentifier>{62c133cf-0439-45dc-bb63-e1be3e2d15b2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Menu">
+      <UniqueIdentifier>{2df6690a-b42e-4584-b897-04827bc94070}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ImGui">
+      <UniqueIdentifier>{e942ad07-9fa7-40b3-809e-10b4757fc906}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Hooks">
+      <UniqueIdentifier>{effa6973-665f-4b0b-9ba7-fe345d2a86ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Cheat">
+      <UniqueIdentifier>{d1c4ea40-7810-47ea-8b69-75c43dd89b11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Settings">
+      <UniqueIdentifier>{92f4aa79-c18b-417b-a066-b0a97d56ba00}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\GeneratedCode">
+      <UniqueIdentifier>{a18e1fb4-589e-4816-b28f-234d47ac9c13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Aimbot">
+      <UniqueIdentifier>{bcb446d5-66c6-490a-9478-00fbc96b59a2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Esp">
+      <UniqueIdentifier>{fc738577-9a4e-4915-b985-5ad2ee6d0c2a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\WallBang">
+      <UniqueIdentifier>{566faaf2-0150-4601-8696-714a3997f6b9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Structures.h">
+      <Filter>Source Files\Structures</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Memory.h">
+      <Filter>Source Files\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Menu.h">
+      <Filter>Source Files\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Hooks.h">
+      <Filter>Source Files\Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Constants.h">
+      <Filter>Source Files\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Settings.h">
+      <Filter>Source Files\Settings</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\Include\imgui_impl_win32.h">
+      <Filter>Source Files\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="ImGui\Include\imgui_impl_opengl2.h">
+      <Filter>Source Files\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Aimbot.h">
+      <Filter>Source Files\Aimbot</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Esp.h">
+      <Filter>Source Files\Esp</Filter>
+    </ClInclude>
+    <ClInclude Include="src\WallBang.h">
+      <Filter>Source Files\WallBang</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Cheat.h">
+      <Filter>Source Files\Cheat</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Silent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Memory.cpp">
+      <Filter>Source Files\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Menu.cpp">
+      <Filter>Source Files\Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GeneratedCode.h">
+      <Filter>Source Files\GeneratedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Hooks.cpp">
+      <Filter>Source Files\Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GeneratedCode.cpp">
+      <Filter>Source Files\GeneratedCode</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Settings.cpp">
+      <Filter>Source Files\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\Include\imgui_impl_win32.cpp">
+      <Filter>Source Files\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="ImGui\Include\imgui_impl_opengl2.cpp">
+      <Filter>Source Files\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Aimbot.cpp">
+      <Filter>Source Files\Aimbot</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Esp.cpp">
+      <Filter>Source Files\Esp</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WallBang.cpp">
+      <Filter>Source Files\WallBang</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Cheat.cpp">
+      <Filter>Source Files\Cheat</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Silent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

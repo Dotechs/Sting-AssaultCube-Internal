@@ -18,6 +18,8 @@ mono_crash.*
 
 # Build results
 InternalSting/
+Intermediates/
+[Bb]uild/
 
 [Dd]ebug/
 [Dd]ebugPublic/

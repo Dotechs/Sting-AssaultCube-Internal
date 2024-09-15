@@ -1,48 +1,53 @@
-w of the features.
+# 🦂 Sting - AssaultCube Cheat
 
-🦂 Sting - AssaultCube Cheat
 
-Sting is a powerful, customizable cheat for AssaultCube, designed for players who want to gain an edge with features like aimbot, ESP, no recoil, and more. Whether you're new to game hacking or a seasoned player, Sting offers a sleek, feature-rich experience built on the latest frameworks.
+**Sting** is a powerful, customizable cheat for **AssaultCube**, designed for players who want to gain an edge with features like aimbot, ESP, no recoil, and more. Whether you're new to game hacking or a seasoned player, Sting offers a sleek, feature-rich experience built on the latest frameworks.  
 
-🎮 Features
-Aimbot
-Automatically locks onto enemies for maximum accuracy.
+---
 
-ESP (Extrasensory Perception)
-See players through walls with customizable ESP options (box, health bars, names, etc.).
+## 🎮 Features
 
-No Recoil
-Fire your weapon without recoil for better accuracy.
+- **Aimbot**  
+  Automatically locks onto enemies for maximum accuracy.
+  
+- **ESP (Extrasensory Perception)**  
+  See players through walls with customizable ESP options (box, health bars, names, etc.).
+  
+- **No Recoil**  
+  Fire your weapon without recoil for better accuracy.
+  
+- **Infinite Ammo**  
+  Never run out of ammo in the heat of battle.
+  
+- **Rapid Fire**  
+  Increase your firing rate beyond normal limits.
+  
+- **One-Shot Kill**  
+  Take down enemies with a single shot, regardless of the weapon.
 
-Infinite Ammo
-Never run out of ammo in the heat of battle.
+- **Crosshair Customization**  
+  Change the appearance and style of your in-game crosshair for better precision.
 
-Rapid Fire
-Increase your firing rate beyond normal limits.
+- **ImGui Cheat Menu**  
+  Easily enable or disable features on the fly using the stylish, customizable ImGui menu.
 
-One-Shot Kill
-Take down enemies with a single shot, regardless of the weapon.
+---
 
-Crosshair Customization
-Change the appearance and style of your in-game crosshair for better precision.
+## ⚙️ Setup & Installation
 
-ImGui Cheat Menu
-Easily enable or disable features on the fly using the stylish, customizable ImGui menu.
+### Prerequisites
+- Windows OS
+- AssaultCube installed (latest version)
+- Visual Studio or any C++ IDE
+- **DirectX SDK** or **OpenGL** development libraries
+- **ImGui** (included in this repo)
 
-⚙️ Setup & Installation
-Prerequisites
-Windows OS
-AssaultCube installed (latest version)
-Visual Studio or any C++ IDE
-DirectX SDK or OpenGL development libraries
-ImGui (included in this repo)
-Installation Steps
-Clone the Repository
+### Installation Steps
 
-bash
-Copy code
-git clone https://github.com/your-username/Sting-AssaultCube-Cheat.git
-cd Sting-AssaultCube-Cheat
+1. **Clone the Repository**  
+   ```bash
+   git clone https://github.com/your-username/Sting-AssaultCube-Cheat.git
+   cd Sting-AssaultCube-Cheat
 Open the Project
 Open the solution (.sln) file in Visual Studio.
 
@@ -92,5 +97,3 @@ If you enjoy using Sting, please consider giving this repo a star 🌟! Feedback
 Sting is licensed under the MIT License.
 
 Enjoy dominating the game with Sting! 🎯
-
-Let me know if you'd like to customize it further!

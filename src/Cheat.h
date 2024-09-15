@@ -20,6 +20,8 @@ public:
 	static float CalculateVectorAngle(Vector3& v1, Vector3& v2);
     static Vector3 AngleToDirection(float pitch, float yaw);
 
+	static void SnapAimLine(PlayerEnt* aimedAt, ImColor& Color, float* FOV);
+
     // Function to calculate the 2D distance between two Vector2 points
 	static float Distance2D(const Vector2& a, const Vector2& b);
 

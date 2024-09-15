@@ -71,6 +71,7 @@ namespace Settings {
 	namespace WallBang {
 		extern bool bWallBang;							//WallBang toggle
 		extern bool bWallBangState;						//WallBang(HotKey) real state
+		extern bool bPreiousState;						//WallBang(HotKey) real state
 		//extern bool bWallBangNoHotKeyState;				//WallBang real state
 		extern int WallBangKey;							//WallBang VK
 		

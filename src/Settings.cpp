@@ -52,6 +52,8 @@ namespace Settings::Aimbot {
 namespace Settings::WallBang {
 	bool bWallBang = false; 						//WallBang toggle
 	bool bWallBangState = false;					//WallBang(HotKey) real state
+	bool bPreviousState = false;
+
 	//bool bWallBangNoHotKeyState = false;			//WallBang real state
 	int WallBangKey = 0;							//WallBang VK
 

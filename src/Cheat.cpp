@@ -41,6 +41,21 @@ Vector3 Cheat::AngleToDirection(float pitch, float yaw)
 	);
 }
 
+void Cheat::SnapAimLine(PlayerEnt* aimedAt, ImColor& Color, float* Fov){
+
+	if (!aimedAt || aimedAt->PlayerMode != 0 || aimedAt->Health < 0 && LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 && LocalPlayer->Health > 0)
+		return;
+
+	vec3 feetScreenPos = vec3(0, 0, 0);
+	bool IsLoadedFeet = Cheat::WorldToScreenEx(aimedAt->FeetPos, feetScreenPos, ViewMatrix, WindowX, WindowY);
+	float FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(feetScreenPos.x, feetScreenPos.y)));
+
+	if (!IsLoadedFeet || FTempDistance > *FOV) {
+		return;
+	}
+	ImGui::GetBackgroundDrawList()->AddLine(ImVec2(WindowX / 2, WindowY), ImVec2(feetScreenPos.x, feetScreenPos.y), Color, 0.60f);
+}
+
 float Cheat::Distance2D(const Vector2& a, const Vector2& b)
 {
 	return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));

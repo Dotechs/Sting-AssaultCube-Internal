@@ -7,11 +7,11 @@
 
 
 void WallBang::ActivateWallBang() {
-
     if (Settings::WallBang::bWallBangState) {
         float ClosestDistance = 1e15f;
         float HTempDistance = 0.0f;
         float FTempDistance = 0.0f;
+        PlayerEnt* LocalWallBanged = nullptr;
 
         for (auto& enemy : EnemiesList) {
             vec3 HEnemyScreen = vec3(0, 0, 0);
@@ -39,7 +39,7 @@ void WallBang::ActivateWallBang() {
                 break;
             }
 
-            if (HEnemyScreen.z < 0 /*|| FEnemyScreen.z < 0*/)//behind
+            if (HEnemyScreen.z < 0 || FEnemyScreen.z < 0)//behind/
                 continue;
 
             HTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(HEnemyScreen.x, HEnemyScreen.y)));
@@ -47,63 +47,69 @@ void WallBang::ActivateWallBang() {
 
             if (Settings::WallBang::bWallBangFOV) {
                 if (HTempDistance > Settings::WallBang::WallBangFOV && FTempDistance > Settings::WallBang::WallBangFOV) {
-                    Constants::WallBangNoppingRight = false;
                     continue;
                 }
             }
 
             if (HTempDistance < ClosestDistance || FTempDistance < ClosestDistance) {
-                WallBanged = enemy;
+                // Constants::WallBangNoppingRight = false;
+                LocalWallBanged = enemy;
+                
                 ClosestDistance = HTempDistance;
             }
+        }
+        WallBanged = LocalWallBanged;
+        if (LocalWallBanged && LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 &&
+            LocalPlayer->Health > 0 && LocalWallBanged->PlayerMode == 0 && LocalWallBanged->Health > 0) {
 
 
-            if (WallBanged && LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 &&
-                LocalPlayer->Health > 0 && WallBanged->PlayerMode == 0 && WallBanged->Health > 0) {
-
-                //Patch All Cross Writers
-                if (Constants::WallBangNoppingRight && !Constants::WallBangNopped) {
-                    Memory::Nop((BYTE*)(Constants::AcModuleBase + 0x56c18), 8u);
-                    Memory::Nop((BYTE*)(Constants::AcModuleBase + 0x56c4e), 8u);
-                    Memory::Nop((BYTE*)(Constants::AcModuleBase + 0x56c56), 8u);
-                    Memory::Nop((BYTE*)(Constants::AcModuleBase + 0xcd506), 4u);
-                    printf("Nopped\n");
-                    Constants::WallBangNopped = true;
-                    //Constants::WallBangNoppingRight = false;
-                    //Settings::WallBang::bWallBangState = false;
-                }
-                if (Constants::WallBangNopped) {
-                    switch (Settings::WallBang::WallBangHitPosIndex) {
-                    case 0:
-                        *CursorPos = Vector3(WallBanged->HeadPos.x, WallBanged->HeadPos.y, WallBanged->HeadPos.z - 0.35f);
-                        break;
-                    case 1:
-                        *CursorPos = Vector3(WallBanged->HeadPos.x, WallBanged->HeadPos.y, WallBanged->HeadPos.z - 1.88f);
-                        break;
-                    case 2:
-                        *CursorPos = Vector3(WallBanged->FeetPos.x, WallBanged->FeetPos.y, WallBanged->FeetPos.z + 0.5f);
-                        break;
-                    }
+            //Patch All Cross Writers
+            if (Constants::WallBangNopped) {
+                switch (Settings::WallBang::WallBangHitPosIndex) {
+                case 0:
+                    *CursorPos = Vector3(LocalWallBanged->HeadPos.x, LocalWallBanged->HeadPos.y, LocalWallBanged->HeadPos.z - 0.35f);
+                    break;
+                case 1:
+                    *CursorPos = Vector3(LocalWallBanged->HeadPos.x, LocalWallBanged->HeadPos.y, LocalWallBanged->HeadPos.z - 1.88f);
+                    break;
+                case 2:
+                    *CursorPos = Vector3(LocalWallBanged->FeetPos.x, LocalWallBanged->FeetPos.y, LocalWallBanged->FeetPos.z + 0.5f);
+                    break;
                 }
             }
+            else{
+                Memory::Nop((BYTE*)(Constants::AcModuleBase + 0x56c18), 8u);
+                Memory::Nop((BYTE*)(Constants::AcModuleBase + 0x56c4e), 8u);
+                Memory::Nop((BYTE*)(Constants::AcModuleBase + 0x56c56), 8u);
+                Memory::Nop((BYTE*)(Constants::AcModuleBase + 0xcd506), 4u);
+                Constants::WallBangNopped = true;
+
+                //printf("Nopped\n");
+            }
         }
+        else
+            goto Patch;
     }
-    else if (Constants::WallBangNopped && !Constants::WallBangNoppingRight) {
-        printf("Patched\n");
-        Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c18), (BYTE*)"\xF3\x0F\x11\x05\x64\x20\x59\x00", 8u);
-        Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c4e), (BYTE*)"\xF3\x0F\x11\x0D\x68\x20\x59\x00", 8u);
-        Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c56), (BYTE*)"\xF3\x0F\x11\x2D\x6C\x20\x59\x00", 8u);
-        Memory::Patch((BYTE*)(Constants::AcModuleBase + 0xcd506), (BYTE*)"\x66\x0F\xD6\x06", 4u);
-        Constants::WallBangNopped = false;
+    else {
+        Patch:
+        if (Constants::WallBangNopped) {
+            Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c18), (BYTE*)"\xF3\x0F\x11\x05\x64\x20\x59\x00", 8u);
+            Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c4e), (BYTE*)"\xF3\x0F\x11\x0D\x68\x20\x59\x00", 8u);
+            Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c56), (BYTE*)"\xF3\x0F\x11\x2D\x6C\x20\x59\x00", 8u);
+            Memory::Patch((BYTE*)(Constants::AcModuleBase + 0xcd506), (BYTE*)"\x66\x0F\xD6\x06", 4u);
+            Constants::WallBangNopped = false;
+            
+            //printf("Patched\n");
+        }
     }
 }
 void WallBang::AimLine(PlayerEnt* aimedAt)
 {
-    if (!Settings::WallBang::bWallBangState || !Settings::WallBang::bWallBang || !Settings::WallBang::bWallBangAimLine || !WallBanged || WallBanged->PlayerMode != 0 || WallBanged->Health < 0)
+    if (!Settings::WallBang::bWallBangState || !Settings::WallBang::bWallBang || !Settings::WallBang::bWallBangAimLine || !aimedAt || aimedAt->PlayerMode != 0 || aimedAt->Health < 0)
         return;
 
     vec3 feetScreenPos = vec3(0, 0, 0);
-    bool IsLoadedFeet = Cheat::WorldToScreenEx(std::move(WallBanged->FeetPos), feetScreenPos, ViewMatrix, WindowX, WindowY);
+    bool IsLoadedFeet = Cheat::WorldToScreenEx(aimedAt->FeetPos, feetScreenPos, ViewMatrix, WindowX, WindowY);
     float FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(feetScreenPos.x, feetScreenPos.y)));
 
     if (!IsLoadedFeet || FTempDistance > Settings::WallBang::WallBangFOV) {

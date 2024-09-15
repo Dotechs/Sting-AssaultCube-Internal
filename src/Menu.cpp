@@ -797,27 +797,22 @@ BOOL __stdcall Hooks::SwapBuffersH(HDC hdc) { // MAIN LOOP
 
 		if (Settings::Aimbot::AimbotKey == 0) {
 			if (Settings::Aimbot::bAimbotAimLine)
-				Aimbot::AimLine(Aimbotted);
+				Cheat::SnapAimLine(Aimbotted, Settings::Aimbot::AimbotAimLineC,&Settings::Aimbot::AimbotFOV);
 		}
 		else if(!Constants::ChoosingAimbotKey){
 			if (Settings::Aimbot::bAimbotAimLine)
-				Aimbot::AimLine(Aimbotted);
+				Cheat::SnapAimLine(Aimbotted, Settings::Aimbot::AimbotAimLineC, &Settings::Aimbot::AimbotFOV);
 		}
 	}
 	//WallBang
-	if (Settings::WallBang::bWallBang) {
+	if (Settings::WallBang::bWallBang && Settings::WallBang::bWallBangAimLine) {
 		if (Settings::WallBang::WallBangKey == 0) { // No Custom WallBang Key
-			if (Settings::WallBang::bWallBangAimLine) {
-				WallBang::AimLine(WallBanged);
-			}
-			//WallBang::ActivateWallBang();
+			Cheat::SnapAimLine(WallBanged, Settings::WallBang::WallBangAimLineC, &Settings::WallBang::WallBangFOV);
 
 		}
-		else if (!Constants::ChoosingWallBangKey) { // Custom Key!
-			if (Settings::WallBang::bWallBangAimLine) {
-				WallBang::AimLine(WallBanged);
-			}
-			//WallBang::ActivateWallBang();
+		else if (Settings::WallBang::bWallBangState/* && Constants::WallBangNopped*/) { // Custom Key!
+			Cheat::SnapAimLine(WallBanged, Settings::WallBang::WallBangAimLineC, &Settings::WallBang::WallBangFOV);
+
 		}
 	}
 

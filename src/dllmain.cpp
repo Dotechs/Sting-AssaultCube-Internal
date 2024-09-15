@@ -21,8 +21,8 @@ bool Constants::WallBangNoppingRight = false;
 bool Constants::SilentNopped = false;
 bool Constants::SilentNoppingRight = false;
 
-void BackLoop() {
-	if(!Constants::AcModuleBase)
+void Updating() {
+	if (!Constants::AcModuleBase)
 		Constants::AcModuleBase = (uintptr_t)GetModuleHandleA("ac_client.exe");
 	while (Constants::AcModuleBase) {
 		PlayerEntAddress = (DWORD*)(Constants::AcModuleBase + 0x17E0A8);
@@ -63,7 +63,13 @@ void BackLoop() {
 			PRealHealth = &LocalPlayer->Health;
 			IsFirstTime = false;
 		}
+	}
+}
 
+void BackLoop() {
+	if (!Constants::AcModuleBase)
+		Constants::AcModuleBase = (uintptr_t)GetModuleHandleA("ac_client.exe");
+	while (Constants::AcModuleBase) {
 		/////////////////
 		if (GetAsyncKeyState(VK_INSERT) & 0b1) {
 			Menu::ToggleMenu();
@@ -87,23 +93,30 @@ void BackLoop() {
 
 		//WallBang KeyCheck
 		if (Settings::WallBang::bWallBang) {
+
 			if (Settings::WallBang::WallBangKey != 0) {
-				if (GetAsyncKeyState(Settings::WallBang::WallBangKey & 0x8000)/* && !Constants::ChoosingWallBangKey*/) {
+				if (GetAsyncKeyState(Settings::WallBang::WallBangKey/* & 0b1*/)/* && !Constants::ChoosingWallBangKey*/) {
 					Settings::WallBang::bWallBangState = true;
-					Constants::WallBangNoppingRight = true;
 					WallBang::ActivateWallBang();
+					//Constants::WallBangNoppingRight = true;
 				}
 				else {
 					Settings::WallBang::bWallBangState = false;
-					Constants::WallBangNoppingRight = false;
 					WallBang::ActivateWallBang();
+					//Constants::WallBangNoppingRight = false;
 				}
 			}
 			else {
 				Settings::WallBang::bWallBangState = true;
-				Constants::WallBangNoppingRight = true;
+				//Constants::WallBangNoppingRight = true;
 				WallBang::ActivateWallBang(); 
 			}
+			//printf("State : &b\nInstruction : &b", Settings::WallBang::bWallBangState)
+
+		}
+		else {
+			Settings::WallBang::bWallBangState = false;
+			WallBang::ActivateWallBang(); 
 		}
 
 		//Silent KeyCheck
@@ -175,6 +188,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReser
 		Constants::DllHandle = hModule;
 		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)SwapBuffersInit, hModule, NULL, NULL);
 		Sleep(1000);
+		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)Updating, hModule, NULL, NULL);
 		CreateThread(0, 0, (LPTHREAD_START_ROUTINE)BackLoop, hModule, NULL, NULL);
 	}
 	return TRUE;

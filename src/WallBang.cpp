@@ -103,6 +103,7 @@ void WallBang::ActivateWallBang() {
         }
     }
 }
+
 void WallBang::AimLine(PlayerEnt* aimedAt)
 {
     if (!Settings::WallBang::bWallBangState || !Settings::WallBang::bWallBang || !Settings::WallBang::bWallBangAimLine || !aimedAt || aimedAt->PlayerMode != 0 || aimedAt->Health < 0)

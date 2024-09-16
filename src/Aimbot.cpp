@@ -10,199 +10,182 @@ HMODULE Constants::AimLineHandle;
 
 void Aimbot::ActivateAimbot() {
     if (Settings::Aimbot::bAimbotState) {
+
         if (Settings::Aimbot::AimbotTypeIndex == 0) {
 
-            float closest_player = 1e30f;
-            float closest_yaw = 0.0f;
-            float closest_pitch = 0.0f;
+            float ClosestDistance = 1e5f;
+            float Yaw = 0.0f, Pitch = 0.0f;
+            PlayerEnt* LocalAimbotted = nullptr;
 
             for (auto& enemy : EnemiesList) {
 
+                float AbsPosX = (enemy->HeadPos.x) - LocalPlayer->HeadPos.x;
+                float AbsPosY = (enemy->HeadPos.y) - LocalPlayer->HeadPos.y;
 
+                float temp_distance = sqrtf(AbsPosX * AbsPosX + AbsPosY * AbsPosY);
 
-                float abspos_x = (enemy->HeadPos.x) - LocalPlayer->HeadPos.x;
-                float abspos_y = (enemy->HeadPos.y) - LocalPlayer->HeadPos.y;
-                float abspos_z = (enemy->HeadPos.z) - LocalPlayer->HeadPos.z;
-
-                float temp_distance = sqrtf(abspos_x * abspos_x + abspos_y * abspos_y);
-
-                if (temp_distance < closest_player) {
-                    closest_player = temp_distance;
+                if (temp_distance < ClosestDistance) {
+                    ClosestDistance = temp_distance;
+                    LocalAimbotted = enemy;
 
 
                     //Aimbot Logic
-                    float abspos_x;
-                    float abspos_y;
-                    float abspos_z;
+                    float AbsPosX;
+                    float AbsPosY;
+                    float AbsPosZ;
 
                     switch (Settings::Aimbot::AimbotHitPosIndex)
                     {
                     case 0:
-                        abspos_x = (enemy->HeadPos.x) - LocalPlayer->HeadPos.x;
-                        abspos_y = (enemy->HeadPos.y) - LocalPlayer->HeadPos.y;
-                        abspos_z = (enemy->HeadPos.z) - LocalPlayer->HeadPos.z;
+                        AbsPosX = (LocalAimbotted->HeadPos.x) - LocalPlayer->HeadPos.x;
+                        AbsPosY = (LocalAimbotted->HeadPos.y) - LocalPlayer->HeadPos.y;
+                        AbsPosZ = (LocalAimbotted->HeadPos.z) - LocalPlayer->HeadPos.z;
                         break;
                     case 1:
-                        abspos_x = (enemy->HeadPos.x) - LocalPlayer->HeadPos.x;
-                        abspos_y = (enemy->HeadPos.y) - LocalPlayer->HeadPos.y;
-                        abspos_z = (enemy->HeadPos.z - 1.88f) - LocalPlayer->HeadPos.z;
+                        AbsPosX = (LocalAimbotted->HeadPos.x) - LocalPlayer->HeadPos.x;
+                        AbsPosY = (LocalAimbotted->HeadPos.y) - LocalPlayer->HeadPos.y;
+                        AbsPosZ = (LocalAimbotted->HeadPos.z - 1.88f) - LocalPlayer->HeadPos.z;
                         break;
                     case 2:
-                        abspos_x = (enemy->FeetPos.x) - LocalPlayer->HeadPos.x;
-                        abspos_y = (enemy->FeetPos.y) - LocalPlayer->HeadPos.y;
-                        abspos_z = (enemy->FeetPos.z + 0.5f) - LocalPlayer->HeadPos.z;
+                        AbsPosX = (LocalAimbotted->FeetPos.x) - LocalPlayer->HeadPos.x;
+                        AbsPosY = (LocalAimbotted->FeetPos.y) - LocalPlayer->HeadPos.y;
+                        AbsPosZ = (LocalAimbotted->FeetPos.z + 0.5f) - LocalPlayer->HeadPos.z;
                         break;
                     default:
                         exit(-1);
                         break;
                     }
+                    Angle angletoenemy = Cheat::AngleToEnemy(LocalAimbotted, vec3(AbsPosX, AbsPosY, AbsPosZ));
+                    Yaw = angletoenemy.yaw; Pitch = angletoenemy.pitch;
 
-                    float azimuth_xy = atan2f(abspos_y, abspos_x);
-                    closest_yaw = azimuth_xy * (180.0f / M_PI) + 90.0f;
 
-                    float hypotenuse = sqrtf(abspos_x * abspos_x + abspos_y * abspos_y + abspos_z * abspos_z);
-                    closest_pitch = asinf(abspos_z / hypotenuse) * (180.0f / M_PI) + 1.0f;
-                    Aimbotted = enemy;
+                    //float azimuth_xy = atan2f(AbsPosY, AbsPosX);
+                    //Yaw = azimuth_xy * (180.0f / M_PI) + 90.0f;
+                    //float hypotenuse = sqrtf(AbsPosX * AbsPosX + AbsPosY * AbsPosY + AbsPosZ * AbsPosZ);
+                    //Pitch = asinf(AbsPosZ / hypotenuse) * (180.0f / M_PI) + 1.0f;
                 }
-
             }
+            Aimbotted = LocalAimbotted;
+                    
+            if (LocalAimbotted && LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 &&
+                LocalPlayer->Health > 0 && LocalAimbotted->PlayerMode == 0 && LocalAimbotted->Health > 0) {
 
-            // Check if a valid target was found
-            if (Aimbotted && LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 &&
-                LocalPlayer->Health > 0 && Aimbotted->PlayerMode == 0 && Aimbotted->Health > 0) {
-                // Calculate yaw and pitch differences
-                float yaw_diff = closest_yaw - LocalPlayer->ViewAngles.yaw;
-                float pitch_diff = closest_pitch - LocalPlayer->ViewAngles.pitch;
+                float DYaw = Yaw - LocalPlayer->ViewAngles.yaw;
+                float DPitch = Pitch - LocalPlayer->ViewAngles.pitch;
 
-                // Adjust yaw_diff to be within the range [-180, 180]
-                if (yaw_diff > 180.0f) {
-                    yaw_diff -= 360.0f;
+                // Normalizing The Angle!
+                if (DYaw > 180.0f) {
+                    DYaw -= 360.0f;
                 }
-                else if (yaw_diff < -180.0f) {
-                    yaw_diff += 360.0f;
+                else if (DYaw < -180.0f) {
+                    DYaw += 360.0f;
                 }
-
-                // Adjust pitch_diff to be within the range [-180, 180]
-                if (pitch_diff > 180.0f) {
-                    pitch_diff -= 360.0f;
+                if (DPitch > 180.0f) {
+                    DPitch -= 360.0f;
                 }
-                else if (pitch_diff < -180.0f) {
-                    pitch_diff += 360.0f;
+                else if (DPitch < -180.0f) {
+                    DPitch += 360.0f;
                 }
 
-                LocalPlayer->ViewAngles.yaw += yaw_diff * Settings::Aimbot::Smoothness;
-                LocalPlayer->ViewAngles.pitch += pitch_diff * Settings::Aimbot::Smoothness;
+                float LerpFactor = 1.0f / Settings::Aimbot::Smoothness;
+
+                LocalPlayer->ViewAngles.yaw += DYaw / LerpFactor;
+                LocalPlayer->ViewAngles.pitch += DPitch / LerpFactor;
 
             }
         }
 
         if (Settings::Aimbot::AimbotTypeIndex == 1) {
-            float ClosestDistance = 1e15f;
-            float HTempDistance = 0.0f;
-            float FTempDistance = 0.0f;
-            //Aimbotted = nullptr;
 
-            float Yaw = 0, Pitch = 0, DYaw = 0.0f, DPitch = 0.0f;
-
+            float ClosestDistance = 1e5f;
+            float Yaw = 0, Pitch = 0;
+            PlayerEnt* LocalAimbotted = nullptr;
+            
             for (auto& enemy : EnemiesList) {
-                vec3 HEnemyScreen = vec3(0, 0, 0);
-                vec3 FEnemyScreen = vec3(0, 0, 0);
-                if (!Cheat::WorldToScreenEx(std::move(enemy->HeadPos), HEnemyScreen, ViewMatrix, WindowX, WindowY) || !Cheat::WorldToScreenEx(std::move(enemy->FeetPos), FEnemyScreen, ViewMatrix, WindowX, WindowY))
+                vec2 HEnemyScreen = vec2(0, 0);
+                vec2 FEnemyScreen = vec2(0, 0);
+                vec2 TempDistances = vec2(0, 0); // x = HeadTemp , y = FeetTemp
+
+                if (!Cheat::IsEnemyLoadedR(enemy, HEnemyScreen, FEnemyScreen, HEAD_AND_FEET))
                     continue;
-                if (HEnemyScreen.z < 0 || FEnemyScreen.z < 0) //behind
+                if (!Cheat::IsEnemyInFOV(enemy, &Settings::Aimbot::AimbotFOV, HEnemyScreen, FEnemyScreen, TempDistances, ANY))
                     continue;
-                HTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(HEnemyScreen.x, HEnemyScreen.y)));
-                FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(FEnemyScreen.x, FEnemyScreen.y)));
+                //if (!Cheat::WorldToScreenEx(enemy->HeadPos, HEnemyScreen, ViewMatrix, WindowX, WindowY) || !Cheat::WorldToScreenEx(enemy->FeetPos, FEnemyScreen, ViewMatrix, WindowX, WindowY))
+                //    continue;
+                //if (HEnemyScreen.z < 0 || FEnemyScreen.z < 0) //behind
+                //    continue;
+                // 
+                //HTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(HEnemyScreen.x, HEnemyScreen.y)));
+                //FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(FEnemyScreen.x, FEnemyScreen.y)));
+                //if (HTempDistance > Settings::Aimbot::AimbotFOV && FTempDistance > Settings::Aimbot::AimbotFOV) {
+                //    continue;
+                //}
+                if (TempDistances.x < ClosestDistance || TempDistances.y < ClosestDistance) {
+                    //Closer than the last loop ent enemy!
+                    LocalAimbotted = enemy;
+                    ClosestDistance = TempDistances.y;
 
-                if (HTempDistance > Settings::Aimbot::AimbotFOV && FTempDistance > Settings::Aimbot::AimbotFOV) {
-                    continue;
-                }
-                if (HTempDistance < ClosestDistance && FTempDistance < ClosestDistance) {
+                    float AbsPosX;
+                    float AbsPosY;
+                    float AbsPosZ;
 
-                    Aimbotted = enemy;
-                    ClosestDistance = HTempDistance;
-
-                    //Aimbot Logic
-                    float abspos_x;
-                    float abspos_y;
-                    float abspos_z;
-
+                    //Switching User HitPos Choise!
                     switch (Settings::Aimbot::AimbotHitPosIndex)
                     {
                     case 0:
-                        abspos_x = (Aimbotted->HeadPos.x) - LocalPlayer->HeadPos.x;
-                        abspos_y = (Aimbotted->HeadPos.y) - LocalPlayer->HeadPos.y;
-                        abspos_z = (Aimbotted->HeadPos.z) - LocalPlayer->HeadPos.z;
+                        AbsPosX = (LocalAimbotted->HeadPos.x) - LocalPlayer->HeadPos.x;
+                        AbsPosY = (LocalAimbotted->HeadPos.y) - LocalPlayer->HeadPos.y;
+                        AbsPosZ = (LocalAimbotted->HeadPos.z) - LocalPlayer->HeadPos.z;
                         break;
                     case 1:
-                        abspos_x = (Aimbotted->HeadPos.x) - LocalPlayer->HeadPos.x;
-                        abspos_y = (Aimbotted->HeadPos.y) - LocalPlayer->HeadPos.y;
-                        abspos_z = (Aimbotted->HeadPos.z - 1.88f) - LocalPlayer->HeadPos.z;
+                        AbsPosX = (LocalAimbotted->HeadPos.x) - LocalPlayer->HeadPos.x;
+                        AbsPosY = (LocalAimbotted->HeadPos.y) - LocalPlayer->HeadPos.y;
+                        AbsPosZ = (LocalAimbotted->HeadPos.z - 1.88f) - LocalPlayer->HeadPos.z;
                         break;
                     case 2:
-                        abspos_x = (Aimbotted->FeetPos.x) - LocalPlayer->HeadPos.x;
-                        abspos_y = (Aimbotted->FeetPos.y) - LocalPlayer->HeadPos.y;
-                        abspos_z = (Aimbotted->FeetPos.z + 0.5f) - LocalPlayer->HeadPos.z;
+                        AbsPosX = (LocalAimbotted->FeetPos.x) - LocalPlayer->HeadPos.x;
+                        AbsPosY = (LocalAimbotted->FeetPos.y) - LocalPlayer->HeadPos.y;
+                        AbsPosZ = (LocalAimbotted->FeetPos.z + 0.5f) - LocalPlayer->HeadPos.z;
                         break;
                     default:
                         exit(-1);
                         break;
                     }
-                    // Calculate Yaw (horizontal angle)
-                    float azimuth_xy = atan2f(abspos_y, abspos_x);
-                    Yaw = azimuth_xy * (180.0f / M_PI) + 90.0f;
 
-                    // Calculate Pitch (vertical angle)
-                    float hypotenuse = sqrtf(abspos_x * abspos_x + abspos_y * abspos_y + abspos_z * abspos_z);
-                    Pitch = asinf(abspos_z / hypotenuse) * (180.0f / M_PI);
+                    //Getting Angle To Enemy!
+                    Angle angletoenemy = Cheat::AngleToEnemy(LocalAimbotted, vec3(AbsPosX, AbsPosY, AbsPosZ));
+                    Yaw = angletoenemy.yaw; Pitch = angletoenemy.pitch;
+                }
+               
+            }
+            Aimbotted = LocalAimbotted;
+            if (LocalAimbotted && LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 &&
+                LocalPlayer->Health > 0 && LocalAimbotted->PlayerMode == 0 && LocalAimbotted->Health > 0) {
+
+
+                float DYaw = Yaw - LocalPlayer->ViewAngles.yaw;
+                float DPitch = Pitch - LocalPlayer->ViewAngles.pitch;
+
+                // Normalizing The Angle!
+                if (DYaw > 180.0f) {
+                    DYaw -= 360.0f;
+                }
+                else if (DYaw < -180.0f) {
+                    DYaw += 360.0f;
+                }
+                if (DPitch > 180.0f) {
+                    DPitch -= 360.0f;
+                }
+                else if (DPitch < -180.0f) {
+                    DPitch += 360.0f;
                 }
 
-                if (Aimbotted && LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 &&
-                    LocalPlayer->Health > 0 && Aimbotted->PlayerMode == 0 && Aimbotted->Health > 0) {
+                float LerpFactor = 1.0f / Settings::Aimbot::Smoothness;
+                LocalPlayer->ViewAngles.yaw += DYaw / LerpFactor;
+                LocalPlayer->ViewAngles.pitch += DPitch / LerpFactor;
 
-
-                    DYaw = Yaw - LocalPlayer->ViewAngles.yaw;
-                    DPitch = Pitch - LocalPlayer->ViewAngles.pitch;
-
-                    if (DYaw > 180.0f) {
-                        DYaw -= 360.0f;
-                    }
-                    else if (DYaw < -180.0f) {
-                        DYaw += 360.0f;
-                    }
-                    if (DPitch > 180.0f) {
-                        DPitch -= 360.0f;
-                    }
-                    else if (DPitch < -180.0f) {
-                        DPitch += 360.0f;
-                    }
-
-                    float LerpFactor = 1.0f / Settings::Aimbot::Smoothness;
-
-                    LocalPlayer->ViewAngles.yaw += DYaw / LerpFactor;
-                    LocalPlayer->ViewAngles.pitch += DPitch / LerpFactor;
-                }
             }
         }
     }
+
 }
-void Aimbot::AimLine(PlayerEnt* aimedAt)
-{
-	if (!Settings::Aimbot::bAimbotState||!Settings::Aimbot::bAimbot && !Settings::Aimbot::bAimbotAimLine || !Aimbotted || Aimbotted->PlayerMode != 0 || Aimbotted->Health < 0)
-		return;
-
-	vec3 FeetPos = { Aimbotted->FeetPos.x, Aimbotted->FeetPos.y, Aimbotted->FeetPos.z };
-	vec3 feetScreenPos = vec3(0, 0, 0);
-	bool IsLoadedFeet = Cheat::WorldToScreenEx(std::move(Aimbotted->FeetPos), feetScreenPos, ViewMatrix, WindowX, WindowY);
-    float FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(feetScreenPos.x, feetScreenPos.y)));
-
-    if (!IsLoadedFeet || FTempDistance > Settings::Aimbot::AimbotFOV && Settings::Aimbot::AimbotTypeIndex ==1) {
-        return;
-    }
-	if (LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 && LocalPlayer->Health > 0 && aimedAt && aimedAt->Health > 0 && aimedAt->PlayerMode == 0)
-		ImGui::GetBackgroundDrawList()->AddLine(ImVec2(WindowX / 2, WindowY), ImVec2(feetScreenPos.x, feetScreenPos.y), Settings::Aimbot::AimbotAimLineC, 1.0f);
-	//std::this_thread::sleep_for(std::chrono::milliseconds(5));
-}
-
-
-

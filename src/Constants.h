@@ -9,6 +9,12 @@
 #define SpreadD			LocalPlayer->inventory->Spread
 #define DamageD			LocalPlayer->GunEnt->GeneralData->GunDamage
 #define M_PI			3.14159265358979323846
+
+
+constexpr auto HEAD_ONLY = 0;
+constexpr auto FEET_ONLY = 1;
+constexpr auto HEAD_AND_FEET = 2;
+constexpr auto ANY = 3;
 //#define obf(std::string) []() { static auto result = Obf::Xor_String<sizeof(std::string)/sizeof(char)>(std::string); return result(); }()
 
 const ImVec4 Red4 = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
@@ -60,6 +66,7 @@ struct Constants {
 	static bool WallBangNopped;
 	static bool WallBangNoppingRight;
 
+	
 	//Silent
 	static bool SilentNopped;
 	static bool SilentNoppingRight;

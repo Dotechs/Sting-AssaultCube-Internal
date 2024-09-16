@@ -27,22 +27,21 @@ public:
 
 
 
-	//(float*, float*, float, float, float, float);
-	////TraceLine
-	typedef int(__cdecl* TraceLineT)(float*, int, int, int*);
-	static TraceLineT TraceLineO;
+	//TraceLine
+	//typedef int(__cdecl* TraceLineT)(float*, int, int, int*);
+	//static TraceLineT TraceLineO;
 
-	static uintptr_t* TraceLineTar;
-	static int __cdecl TraceLineH(float*, int, int, int*);
-
+	//static uintptr_t* TraceLineTar;
+	//static int __cdecl TraceLineH(float*, int, int, int*);
 
 
-	//TraceShootWrapper
-	typedef int(__cdecl* TraceShootWrapperT)(int*, float*, int, float*, int*, char);
-	static TraceShootWrapperT TraceShootWrapperO;
 
-	static uintptr_t* TraceShootWrapperTar;
-	static int __cdecl TraceShootWrapperH(int*, float*, int, float*, int*, char);
+	////TraceShootWrapper
+	//typedef int(__cdecl* TraceShootWrapperT)(int*, float*, int, float*, int*, char);
+	//static TraceShootWrapperT TraceShootWrapperO;
+
+	//static uintptr_t* TraceShootWrapperTar;
+	//static int __cdecl TraceShootWrapperH(int*, float*, int, float*, int*, char);
 
 
 	//Functions

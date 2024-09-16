@@ -16,8 +16,8 @@ void Silent::ActivateSilent()
         float Yaw, Pitch, DYaw = 0.0f, DPitch = 0.0f;
 
         for (auto& enemy : EnemiesList) {
-            vec3 HEnemyScreen = vec3(0, 0, 0);
-            vec3 FEnemyScreen = vec3(0, 0, 0);
+            vec2 HEnemyScreen = vec2(0, 0);
+            vec2 FEnemyScreen = vec2(0, 0);
 
             switch (Settings::Silent::SilentAimHitPosIndex)
             {
@@ -40,10 +40,6 @@ void Silent::ActivateSilent()
                 exit(-1);
                 break;
             }
-
-
-            if (HEnemyScreen.z < 0 || FEnemyScreen.z < 0) //behind
-                continue;
 
             HTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(HEnemyScreen.x, HEnemyScreen.y)));
             FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(FEnemyScreen.x, FEnemyScreen.y)));
@@ -114,20 +110,3 @@ void Silent::ActivateSilent()
         }
     }
 }
-    void Silent::AimLine(PlayerEnt * aimedAt)
-    {
-        if (!Settings::Silent::bSilentState || !Settings::Silent::bSilent || !Settings::Silent::bSilentAimLine || !Silented || Silented->PlayerMode != 0 || Silented->Health < 0)
-            return;
-
-        vec3 feetScreenPos = vec3(0, 0, 0);
-        bool IsLoadedFeet = Cheat::WorldToScreenEx(std::move(Silented->FeetPos), feetScreenPos, ViewMatrix, WindowX, WindowY);
-        float FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(feetScreenPos.x, feetScreenPos.y)));
-
-        if (!IsLoadedFeet || FTempDistance > Settings::Silent::SilentFov) {
-            return;
-        }
-        if (LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 && LocalPlayer->Health > 0 && aimedAt && aimedAt->Health > 0 && aimedAt->PlayerMode == 0)
-            ImGui::GetBackgroundDrawList()->AddLine(ImVec2(WindowX / 2, WindowY), ImVec2(feetScreenPos.x, feetScreenPos.y), Settings::Silent::SilentAimLineC, 0.60f);
-
-
-    }

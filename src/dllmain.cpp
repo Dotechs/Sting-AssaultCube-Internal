@@ -18,8 +18,10 @@ bool Constants::ChoosingSilentKey = false;
 bool Constants::WallBangNopped = false;
 bool Constants::WallBangNoppingRight = false;
 
+
 bool Constants::SilentNopped = false;
 bool Constants::SilentNoppingRight = false;
+
 
 void Updating() {
 	if (!Constants::AcModuleBase)
@@ -67,10 +69,7 @@ void Updating() {
 }
 
 void BackLoop() {
-	if (!Constants::AcModuleBase)
-		Constants::AcModuleBase = (uintptr_t)GetModuleHandleA("ac_client.exe");
 	while (Constants::AcModuleBase) {
-		/////////////////
 		if (GetAsyncKeyState(VK_INSERT) & 0b1) {
 			Menu::ToggleMenu();
 		}
@@ -78,45 +77,23 @@ void BackLoop() {
 			Menu::CleanAndExit();
 		}
 
-		//Aimbot KeyCheck
-		if (Settings::Aimbot::AimbotKey != 0) {
-			if (GetAsyncKeyState(Settings::Aimbot::AimbotKey) && !Constants::ChoosingAimbotKey/* && !Settings::Aimbot::bAimbotState*/) {
-				Settings::Aimbot::bAimbotState = true;
-			}
-			else {
-				Settings::Aimbot::bAimbotState = false;
-			}
-		}
-		else {
-			Settings::Aimbot::bAimbotState = true;
-		}
+		//Aimbot KeyCheck -> Menu.cpp
 
 		//WallBang KeyCheck
 		if (Settings::WallBang::bWallBang) {
 
 			if (Settings::WallBang::WallBangKey != 0) {
-				if (GetAsyncKeyState(Settings::WallBang::WallBangKey/* & 0b1*/)/* && !Constants::ChoosingWallBangKey*/) {
+				if (GetAsyncKeyState(Settings::WallBang::WallBangKey/* & 0b1*/))
 					Settings::WallBang::bWallBangState = true;
-					WallBang::ActivateWallBang();
-					//Constants::WallBangNoppingRight = true;
-				}
-				else {
+				else
 					Settings::WallBang::bWallBangState = false;
-					WallBang::ActivateWallBang();
-					//Constants::WallBangNoppingRight = false;
-				}
+
+				WallBang::ActivateWallBang();
 			}
 			else {
 				Settings::WallBang::bWallBangState = true;
-				//Constants::WallBangNoppingRight = true;
-				WallBang::ActivateWallBang(); 
+				WallBang::ActivateWallBang();
 			}
-			//printf("State : &b\nInstruction : &b", Settings::WallBang::bWallBangState)
-
-		}
-		else {
-			Settings::WallBang::bWallBangState = false;
-			WallBang::ActivateWallBang(); 
 		}
 
 		//Silent KeyCheck
@@ -138,25 +115,16 @@ void BackLoop() {
 }
 
 void SwapBuffersInit() {
-	Menu::CreateDebugConsole();
+	//Menu::CreateDebugConsole();
 
 	Constants::AcModuleBase = (uintptr_t)GetModuleHandleA("ac_client.exe");
 
-	MH_STATUS MhStats = MH_Initialize();
-	if (MhStats != MH_OK)
-	{
-		std::cerr << "[Error] Failed To Initialize MinHook : " << MH_StatusToString(MhStats) << "\t\tExiting...\n";
-		Sleep(1000);
-		MH_DisableHook(MH_ALL_HOOKS);
-		MH_Uninitialize();
-		FreeConsole();
-		FreeLibraryAndExitThread(Constants::DllHandle, 0);
-	}
+	Hooks::InitHooks();
 
 	Hooks::SwapBuffersTar = (uintptr_t*)GetProcAddress(GetModuleHandleA("gdi32.dll"), "SwapBuffers"); 
 	Hooks::ClipCursorTar = (uintptr_t*)GetProcAddress(GetModuleHandleA("user32.dll"), "ClipCursor");
-	Hooks::TraceShootWrapperTar = (uintptr_t*)(Constants::AcModuleBase + 0xCA250);
-	Hooks::TraceLineTar = (uintptr_t*)(Constants::AcModuleBase + 0xCA5E0);
+	//Hooks::TraceShootWrapperTar = (uintptr_t*)(Constants::AcModuleBase + 0xCA250);// TODO
+	//Hooks::TraceLineTar = (uintptr_t*)(Constants::AcModuleBase + 0xCA5E0);// TODO
 
 	if (MH_CreateHook((LPVOID)Hooks::SwapBuffersTar,(LPVOID)Hooks::SwapBuffersH,(LPVOID*)&Hooks::SwapBuffersO) != MH_OK) {
 		std::cout << "[Failed] Hooking SwapBuffers!\n";
@@ -168,10 +136,6 @@ void SwapBuffersInit() {
 		Menu::CleanAndExit();
 	}
 
-	//if (MH_CreateHook((LPVOID)Hooks::TraceLineTar, (LPVOID)Hooks::TraceLineH, (LPVOID*)&Hooks::TraceLineO) != MH_OK) {
-	//	std::cout << "[Failed] Hooking TraceLine!\n";
-	//	Menu::CleanAndExit();
-	//}
 
 	if (MH_EnableHook(MH_ALL_HOOKS) != MH_OK) { // Enables The Hook
 		std::cerr << "[Error] Failed to enable All Hooks!\n";

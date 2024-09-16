@@ -5,8 +5,8 @@
 #include "Cheat.h"
 #include "Constants.h"
 
-vec3 GernadeScreenPos;
-vec3 GernadeOwnerScreenPos;
+vec2 GernadeScreenPos;
+vec2 GernadeOwnerScreenPos;
 ImVec2 GernadePos;
 ImVec2 GernadeOwnerPos;
 float xVal = 0.0f;
@@ -44,9 +44,11 @@ void Esp::DrawEsp() {
 	if (Settings::Aimbot::bAimbot && Settings::Aimbot::bAimbotFOV && Settings::Aimbot::AimbotTypeIndex == 1) {
 		ImGui::GetBackgroundDrawList()->AddCircle(ImVec2(WindowX / 2, WindowY / 2), Settings::Aimbot::AimbotFOV, Settings::Aimbot::AimbotFOVC, 0.5f);
 	}
+
 	if (Settings::WallBang::bWallBang && Settings::WallBang::bWallBangFOV) {
 		ImGui::GetBackgroundDrawList()->AddCircle(ImVec2(WindowX / 2, WindowY / 2), Settings::WallBang::WallBangFOV, Settings::WallBang::WallBangFOVC, 0.5f);
 	}
+
 	if (Settings::Silent::bSilent && Settings::Silent::bSilentFOV) {
 		ImGui::GetBackgroundDrawList()->AddCircle(ImVec2(WindowX / 2, WindowY / 2), Settings::Silent::SilentFov, Settings::Silent::SilentFovC, 0.5f);
 	}
@@ -75,7 +77,8 @@ void Esp::DrawEsp() {
 			ImGuiWindowFlags_NoNav |
 			ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_NoScrollbar))
+			ImGuiWindowFlags_NoScrollbar|
+			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
 			ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "%d Players Around You!", RealEnemyCount);
 			ImGui::End();
@@ -88,8 +91,8 @@ void Esp::DrawEsp() {
 		if (Gernade) {
 			if (Gernade->Rtti == 5592536) {
 
-				GernadeScreenPos = vec3(0, 0, 0);
-				GernadeOwnerScreenPos = vec3(0, 0, 0);
+				GernadeScreenPos = vec2(0, 0);
+				GernadeOwnerScreenPos = vec2(0, 0);
 
 				bool IsGernadeLoaded = Cheat::WorldToScreenEx(std::move(Gernade->Pos), GernadeScreenPos, ViewMatrix, WindowX, WindowY);
 				bool IsGernadeOwnerLoaded = Cheat::WorldToScreenEx(std::move(Gernade->GernadeOwner->HeadPos), GernadeOwnerScreenPos, ViewMatrix, WindowX, WindowY);
@@ -124,8 +127,8 @@ void Esp::DrawEsp() {
 			ImVec2 bottomLeft;
 
 
-			vec3 headScreenPos = vec3(0, 0, 0);
-			vec3 feetScreenPos = vec3(0, 0, 0);
+			vec2 headScreenPos = vec2(0, 0);
+			vec2 feetScreenPos = vec2(0, 0);
 
 			bool IsLoadedHead = Cheat::WorldToScreenEx(std::move(enemy->HeadPos), headScreenPos, ViewMatrix, WindowX, WindowY);
 			bool IsLoadedFeet = Cheat::WorldToScreenEx(std::move(enemy->FeetPos), feetScreenPos, ViewMatrix, WindowX, WindowY);
@@ -163,7 +166,7 @@ void Esp::DrawEsp() {
 			}
 
 			//Names
-			if (Settings::ESP::bNames /*&& !IsTeammate*/) {
+			if (Settings::ESP::bNames) {
 				float textWidth = ImGui::CalcTextSize(enemy->Name).x;
 				ImGui::GetBackgroundDrawList()->AddText(ImVec2(headScreenPos.x - textWidth / 2, headScreenPos.y - 42), Orange, enemy->Name);//Orange
 			}
@@ -204,16 +207,12 @@ void Esp::DrawEsp() {
 				ImGui::GetBackgroundDrawList()->AddText(ImVec2(feetScreenPos.x - ImGui::CalcTextSize(distStr).x / 2, feetScreenPos.y), Purple, distStr);
 
 			}
-
-
-
 		}
-
 	}
 }
 
 
-void Esp::DrawEnemyWarning(vec3& feetScreenPos) {
+void Esp::DrawEnemyWarning(vec2& feetScreenPos) {
 	// Define the colors of the rainbow using ImGui's colors
 	std::vector<ImVec4> rainbowColors = {
 	 ImVec4(1.00f, 0.00f, 0.00f, 1.00f), // Red

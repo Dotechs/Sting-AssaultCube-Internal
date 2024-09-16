@@ -8,16 +8,7 @@
 #include "Structures.h"
 #include "Hooks.h"
 
-//////MATH FUNCTIONS
-
-float Cheat::Dist(PlayerEnt* enemy)
-{
-	float abspos_x = (enemy->HeadPos.x) - LocalPlayer->HeadPos.x;
-	float abspos_y = (enemy->HeadPos.y) - LocalPlayer->HeadPos.y;
-	float abspos_z = (enemy->HeadPos.z) - LocalPlayer->HeadPos.z;
-	return sqrtf(abspos_x * abspos_x + abspos_y * abspos_y);
-}
-
+// Math
 float Cheat::DotProduct(const vec3& v1, const vec3& v2) {
 	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
@@ -39,21 +30,6 @@ Vector3 Cheat::AngleToDirection(float pitch, float yaw)
 		cosf(pitchRad) * sinf(yawRad),
 		sinf(pitchRad)
 	);
-}
-
-void Cheat::SnapAimLine(PlayerEnt* aimedAt, ImColor& Color, float* Fov){
-
-	if (!aimedAt || aimedAt->PlayerMode != 0 || aimedAt->Health < 0 && LocalPlayer->PlayerMode == 0 && *PRealLocalMode == 0 && LocalPlayer->Health > 0)
-		return;
-
-	vec3 feetScreenPos = vec3(0, 0, 0);
-	bool IsLoadedFeet = Cheat::WorldToScreenEx(aimedAt->FeetPos, feetScreenPos, ViewMatrix, WindowX, WindowY);
-	float FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(feetScreenPos.x, feetScreenPos.y)));
-
-	if (!IsLoadedFeet || FTempDistance > *FOV) {
-		return;
-	}
-	ImGui::GetBackgroundDrawList()->AddLine(ImVec2(WindowX / 2, WindowY), ImVec2(feetScreenPos.x, feetScreenPos.y), Color, 0.60f);
 }
 
 float Cheat::Distance2D(const Vector2& a, const Vector2& b)
@@ -84,6 +60,205 @@ void Cheat::Normalize(Vector3& v) {
 float Cheat::CalculateVectorAngle(Vector3& v1, Vector3& v2) {
 	Normalize(v1); Normalize(v2);
 	return acos(DotProduct(v1, v2) / DotProduct(v1, v2));
+}
+
+//SnapLines
+void Cheat::SnapAimLine(PlayerEnt* AimedAt, ImColor& Color, float* Fov){
+	if (!AimedAt || AimedAt->PlayerMode != 0 || AimedAt->Health <= 0 || LocalPlayer->PlayerMode != 0 || *PRealLocalMode != 0 || LocalPlayer->Health <= 0)
+		return;
+
+	vec2 feetScreenPos = vec2(0, 0);
+	vec2 headScreenPos = vec2(0, 0);
+
+	if (!Cheat::IsEnemyLoadedR(AimedAt, headScreenPos, feetScreenPos, FEET_ONLY) &&
+		!Cheat::IsEnemyInFOV(AimedAt, Fov, headScreenPos, feetScreenPos, ANY)) {
+		return;
+	}
+	ImGui::GetBackgroundDrawList()->AddLine(ImVec2(WindowX / 2, WindowY), ImVec2(feetScreenPos.x, feetScreenPos.y), Color, 0.60f);
+	//bool IsLoadedFeet = Cheat::WorldToScreenEx(AimedAt->FeetPos, feetScreenPos, ViewMatrix, WindowX, WindowY);
+	//float FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(feetScreenPos.x, feetScreenPos.y)));
+}
+void Cheat::SnapAimLine(PlayerEnt* AimedAt, ImColor& Color) {
+
+	if (!AimedAt || AimedAt->PlayerMode != 0 || AimedAt->Health <= 0 || LocalPlayer->PlayerMode != 0 || *PRealLocalMode != 0 || LocalPlayer->Health <= 0)
+		return;
+
+	//bool IsLoadedFeet = Cheat::WorldToScreenEx(AimedAt->FeetPos, feetScreenPos, ViewMatrix, WindowX, WindowY);
+	//float FTempDistance = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(feetScreenPos.x, feetScreenPos.y)));
+
+
+	vec2 feetScreenPos = vec2(0, 0);
+	vec2 headScreenPos = vec2(0, 0);
+	if (!Cheat::IsEnemyLoadedR(AimedAt, headScreenPos, feetScreenPos, FEET_ONLY))
+		return;
+	
+	ImGui::GetBackgroundDrawList()->AddLine(ImVec2(WindowX / 2, WindowY), ImVec2(feetScreenPos.x, feetScreenPos.y), Color, 0.60f);
+}
+
+
+
+// Enemy Functions
+Angle Cheat::AngleToEnemy(PlayerEnt* enemy, vec3 AbsPositions) {
+	Angle Res = Angle(0, 0, 0);
+	// Calculate Yaw (horizontal angle)
+	float azimuth_xy = atan2f(AbsPositions.y, AbsPositions.x);
+	Res.yaw = azimuth_xy * (180.0f / M_PI) + 90.0f;
+
+	// Calculate Pitch (vertical angle)
+	float hypotenuse = sqrtf(AbsPositions.x * AbsPositions.x + AbsPositions.y * AbsPositions.y + AbsPositions.z * AbsPositions.z);
+	Res.pitch = asinf(AbsPositions.z / hypotenuse) * (180.0f / M_PI);
+	Res.roll = 0.0f;
+	return Res;
+}
+Angle Cheat::AngleToEnemy(PlayerEnt* enemy) {
+	Angle Res = Angle(0, 0, 0);
+	// Angle To HEAD!
+	float abspos_x = (enemy->HeadPos.x) - LocalPlayer->HeadPos.x;
+	float abspos_y = (enemy->HeadPos.y) - LocalPlayer->HeadPos.y;
+	float abspos_z = (enemy->HeadPos.z) - LocalPlayer->HeadPos.z;
+
+
+	// Calculate Yaw (horizontal angle)
+	float azimuth_xy = atan2f(abspos_y, abspos_x);
+	Res.yaw = azimuth_xy * (180.0f / M_PI) + 90.0f;
+
+	// Calculate Pitch (vertical angle)
+	float hypotenuse = sqrtf(abspos_x * abspos_x + abspos_y * abspos_y + abspos_z * abspos_z);
+	Res.pitch = asinf(abspos_z / hypotenuse) * (180.0f / M_PI);
+	Res.roll = 0.0f;
+	return Res;
+}
+
+float Cheat::Dist(PlayerEnt* enemy)
+{
+	float abspos_x = (enemy->HeadPos.x) - LocalPlayer->HeadPos.x;
+	float abspos_y = (enemy->HeadPos.y) - LocalPlayer->HeadPos.y;
+	float abspos_z = (enemy->HeadPos.z) - LocalPlayer->HeadPos.z;
+	return sqrtf(abspos_x * abspos_x + abspos_y * abspos_y);
+}
+
+bool Cheat::IsEnemyLoaded(PlayerEnt* enemy, vec2 HeadScreen, vec2 FeetScreen, int Index) {
+	switch (Index)
+	{
+	case HEAD_ONLY:
+		if (Cheat::WorldToScreenEx(enemy->HeadPos, HeadScreen, ViewMatrix, WindowX, WindowY))
+			return true;
+		break;
+	case FEET_ONLY:
+		if (Cheat::WorldToScreenEx(enemy->FeetPos, FeetScreen, ViewMatrix, WindowX, WindowY))
+			return true;
+		break;
+	case HEAD_AND_FEET:
+		if (Cheat::WorldToScreenEx(enemy->HeadPos, HeadScreen, ViewMatrix, WindowX, WindowY) && Cheat::WorldToScreenEx(enemy->FeetPos, FeetScreen, ViewMatrix, WindowX, WindowY))
+			return true;
+		break;
+	case ANY:
+		if (Cheat::WorldToScreenEx(enemy->HeadPos, HeadScreen, ViewMatrix, WindowX, WindowY) || Cheat::WorldToScreenEx(enemy->FeetPos, FeetScreen, ViewMatrix, WindowX, WindowY))
+			return true;
+		break;
+	default:
+		return false;
+		break;
+	}
+
+
+	return true;
+}
+bool Cheat::IsEnemyLoadedR(PlayerEnt* enemy, vec2& HeadScreen, vec2& FeetScreen, int Index) {
+
+	switch (Index)
+	{
+	case HEAD_ONLY:
+		if (Cheat::WorldToScreenEx(enemy->HeadPos, HeadScreen, ViewMatrix, WindowX, WindowY))
+			return true;
+		break;
+	case FEET_ONLY:
+		if (Cheat::WorldToScreenEx(enemy->FeetPos, FeetScreen, ViewMatrix, WindowX, WindowY))
+			return true;
+		break;
+	case HEAD_AND_FEET:
+		if (Cheat::WorldToScreenEx(enemy->HeadPos, HeadScreen, ViewMatrix, WindowX, WindowY) && Cheat::WorldToScreenEx(enemy->FeetPos, FeetScreen, ViewMatrix, WindowX, WindowY))
+			return true;
+		break;
+	//case ANY:
+	//	if (Cheat::WorldToScreenEx(enemy->HeadPos, HeadScreen, ViewMatrix, WindowX, WindowY) || Cheat::WorldToScreenEx(enemy->FeetPos, FeetScreen, ViewMatrix, WindowX, WindowY))
+	//		return true;
+	//	break;
+	default:
+		return false;
+		break;
+	}
+	return true;
+}
+
+
+//Cares About The Dist!
+bool Cheat::IsEnemyInFOV(PlayerEnt* enemy, float* FOV, vec2 HEnemyScreen, vec2 FEnemyScreen, vec2& DistToEnemy, int index) {
+	DistToEnemy.x = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(HEnemyScreen.x, HEnemyScreen.y)));
+	DistToEnemy.y = abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(FEnemyScreen.x, FEnemyScreen.y)));
+	switch (index)
+	{
+	case HEAD_ONLY:
+		if (DistToEnemy.x < *FOV) {
+			return true;
+		}
+		break;
+	case FEET_ONLY:
+		if (DistToEnemy.y < *FOV) {
+			return true;
+		}
+		break;
+	case HEAD_AND_FEET:
+		if (DistToEnemy.x < *FOV && DistToEnemy.y < *FOV) {
+			return true;
+		}
+		break;
+	case ANY:
+		if (DistToEnemy.x < *FOV || DistToEnemy.y < *FOV) {
+			return true;
+		}
+		break;
+	default:
+		return false;
+		break;
+	}
+
+	return false;
+}
+
+//Doesn't Care about Dist, Just Wants The Result!
+bool Cheat::IsEnemyInFOV(PlayerEnt* enemy, float* FOV, vec2& HEnemyScreen, vec2& FEnemyScreen, int index) {
+	vec2 DistToEnemy = vec2(abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(HEnemyScreen.x, HEnemyScreen.y))),
+						    abs(Cheat::Distance2D(vec2(WindowX / 2, WindowY / 2), vec2(FEnemyScreen.x, FEnemyScreen.y))));
+
+	switch (index)
+	{
+	case HEAD_ONLY:
+		if (DistToEnemy.x < *FOV) {
+			return true;
+		}
+		break;
+	case FEET_ONLY:
+		if (DistToEnemy.y < *FOV) {
+			return true;
+		}
+		break;
+	case HEAD_AND_FEET:
+		if (DistToEnemy.x < *FOV && DistToEnemy.y < *FOV) {
+			return true;
+		}
+		break;
+	case ANY:
+		if (DistToEnemy.x < *FOV || DistToEnemy.y < *FOV) {
+			return true;
+		}
+		break;
+	default:
+		return false;
+		break;
+	}
+
+	return false;
 }
 
 bool Cheat::IsEnemyAimingAtMe(PlayerEnt* enemy) {
@@ -132,7 +307,6 @@ void GunCheats::InfAmmo(){
 		Memory::Patch((BYTE*)(AmmoLoc), (BYTE*)"\xFF\x08", 2);
 	}
 }
-
 void GunCheats::NoRecoil()
 {
 	if (Settings::GunCheats::bNoRecoil && LocalPlayer && HealthD > 0 && !PlayerModeD) {
@@ -155,7 +329,6 @@ void GunCheats::NoRecoil()
 		Memory::Patch((BYTE*)RJumpVeloLoc, (BYTE*)"\x0F\x57\xC0\xF3\x0F\x11\x48\x18", 8);//Spread Jump KnockBack
 	}
 }
-
 void GunCheats::RapidFire()
 {
 	if (Settings::GunCheats::bRapidFire && LocalPlayer && HealthD > 0 && !PlayerModeD) {
@@ -165,7 +338,6 @@ void GunCheats::RapidFire()
 		Memory::Patch((BYTE*)RapidLoc, (BYTE*)"\x89\x9D\xEC\x01\x00\x00", 6);//Rapid-Fire
 	}
 }
-
 void GunCheats::OneShotKill()
 {
 	if (LocalPlayer && HealthD > 0 && !PlayerModeD) {
@@ -191,7 +363,6 @@ void PlayerCheats::DisableParticles()
 		Memory::Patch((BYTE*)RectanglesLoc, (BYTE*)"\xE8\x83\x10\xFE\xFF", 5);
 	}
 }
-
 void PlayerCheats::NoGravity() {
 	if (Settings::PlayerCheats::NoGravityState)
 		Memory::Nop((BYTE*)GravityLoc, 3);
@@ -199,26 +370,17 @@ void PlayerCheats::NoGravity() {
 		Memory::Patch((BYTE*)GravityLoc,(BYTE*)"\x89\x4E\x48", 3);
 	
 }
-
 //TODO
 void PlayerCheats::NoClip()
 {
 }
-
 //TODO
 void PlayerCheats::InfHealth()
 {
 }
 
-vec3 Cheat::WorldToScreen(vec3&& pos)
-{
-	vec3 screen;
-	if (WorldToScreenEx(std::move(pos), screen, ViewMatrix, WindowX, WindowY))
-		return screen;
-	return vec3(0, 0, 0);
-}
-
-bool Cheat::WorldToScreenEx(vec3&& pos, vec3& screen, float matrix[16], int windowWidth, int windowHeight)
+//W2s's
+bool Cheat::WorldToScreenEx(vec3&& pos, vec2& screen, float matrix[16], int windowWidth, int windowHeight)
 {
 	Vector4 clipCoords;
 
@@ -242,8 +404,7 @@ bool Cheat::WorldToScreenEx(vec3&& pos, vec3& screen, float matrix[16], int wind
 
 	return true;
 }
-
-bool Cheat::WorldToScreenEx(vec3& pos, vec3& screen, float matrix[16], int windowWidth, int windowHeight)
+bool Cheat::WorldToScreenEx(vec3& pos, vec2& screen, float matrix[16], int windowWidth, int windowHeight)
 {
 	Vector4 clipCoords;
 

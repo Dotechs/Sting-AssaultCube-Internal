@@ -4,6 +4,4 @@ class WallBang
 {
 public:
 	static void ActivateWallBang();
-	static void AimLine(PlayerEnt*);
 };
-

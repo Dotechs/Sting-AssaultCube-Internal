@@ -10,6 +10,7 @@
 #include "WallBang.h"
 #include "Esp.h"
 #include "Silent.h"
+#include <Memory.h>
 //OpenGL
 
 bool Menu::ShowMenu;
@@ -309,117 +310,18 @@ void Menu::StartRender()
 	ImGui_ImplOpenGL2_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
-
-	auto renderESP = std::async(std::launch::async, Menu::RenderM);
-	//Menu::RenderM();
-
-	renderESP.get();
+	//auto renderESP = std::async(std::launch::async, Menu::RenderM);
+	//renderESP.get();
 
 }
-
-void RenderVnHaxMenu() {
-	ImGui::SetNextWindowSize(ImVec2(700, 500), ImGuiCond_Once);
-	if (ImGui::Begin("VnHax Menu", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse)) {
-
-		// Tabs at the top (Memory, ESP, Aimbot, Settings)
-		if (ImGui::BeginTabBar("##MainTabs")) {
-			if (ImGui::BeginTabItem("Aimbot")) {
-
-				// Left side - Aimbot and Marco checkboxes (Sub-tabs)
-				ImGui::BeginChild("##SideNav", ImVec2(150, 0), true);
-				static bool aimbotEnabled = true;
-				static bool marcoEnabled = false;
-
-				ImGui::Checkbox("Aimbot", &aimbotEnabled);
-				ImGui::Checkbox("Marco", &marcoEnabled);
-				ImGui::EndChild();
-
-				ImGui::SameLine();
-
-				// Vertical separator
-				ImDrawList* draw_list = ImGui::GetWindowDrawList();
-				ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
-				draw_list->AddLine(ImVec2(cursor_pos.x, cursor_pos.y), ImVec2(cursor_pos.x, cursor_pos.y + 500), IM_COL32(255, 255, 255, 255), 1.0f);
-
-				ImGui::SameLine();
-
-				// Right side - Main content area
-				ImGui::BeginChild("##MainContent", ImVec2(0, 0), true);
-
-				if (aimbotEnabled) {
-					// Aimbot Settings
-					ImGui::Text("Aimbot Settings");
-					ImGui::Separator();
-
-					static int aimbotMode = 2;
-					static float aimbotSpeed = 22.0f;
-					static float aimRegion = 86.24f;
-
-					ImGui::Combo("Aimbot Mode", &aimbotMode, "Mode 1\0Mode 2\0Mode 3\0");
-					ImGui::SliderFloat("Aimbot Speed", &aimbotSpeed, 0.0f, 100.0f, "%.0f");
-					ImGui::SliderFloat("Aim Region Limit", &aimRegion, 0.0f, 100.0f, "%.3f");
-
-					static ImVec4 aimColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
-					ImGui::ColorEdit4("Aim Region Color", (float*)&aimColor);
-
-					static bool aimAtDowned = true;
-					static bool autoShoot = false;
-					ImGui::Checkbox("Aim at Downed Enemies", &aimAtDowned);
-					ImGui::Checkbox("Auto Shoot", &autoShoot);
-				}
-
-				if (marcoEnabled) {
-					// Marco Settings
-					ImGui::Text("Marco Settings");
-					ImGui::Separator();
-
-					static float mouseDragRatio = 3.0f;
-					static bool autoFire = false;
-
-					// Mouse Drag Ratio Slider
-					ImGui::SliderFloat("Mouse Drag Ratio", &mouseDragRatio, 1.0f, 10.0f, "%.0f");
-
-					// Auto Fire Checkbox
-					ImGui::Checkbox("Auto Fire", &autoFire);
-				}
-
-				ImGui::EndChild();
-				ImGui::EndTabItem();
-			}
-
-			if (ImGui::BeginTabItem("Memory")) {
-				// Memory Tab Content (Placeholder)
-				ImGui::Text("Memory Settings");
-				ImGui::Separator();
-				ImGui::Text("Memory settings would go here.");
-				ImGui::EndTabItem();
-			}
-
-			if (ImGui::BeginTabItem("ESP")) {
-				// ESP Tab Content (Placeholder)
-				ImGui::Text("ESP Settings");
-				ImGui::Separator();
-				ImGui::Text("ESP settings would go here.");
-				ImGui::EndTabItem();
-			}
-
-			if (ImGui::BeginTabItem("Settings")) {
-				// Settings Tab Content (Placeholder)
-				ImGui::Text("Settings");
-				ImGui::Separator();
-				ImGui::Text("Settings options would go here.");
-				ImGui::EndTabItem();
-			}
-
-			ImGui::EndTabBar();
-		}
-	}
-	ImGui::End();
-}
-
-
-void Menu::RenderM()
+void Menu::ToggleMenu()
 {
+	ShowMenu = !ShowMenu;
+}
+
+
+
+void Menu::RenderM() {
 
 	Esp::DrawEsp();
 
@@ -430,58 +332,58 @@ void Menu::RenderM()
 		ImGui::SetNextWindowPos(windowPos, ImGuiCond_Appearing /*ImGuiCond_FirstUseEver*/);
 		ImGui::SetNextWindowSize(windowSize, ImGuiCond_Always);
 
-		ImGui::Begin("Game Information", nullptr,
+		if (ImGui::Begin("Game Information", nullptr,
 			ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoCollapse |
-			ImGuiWindowFlags_NoFocusOnAppearing);
+			ImGuiWindowFlags_NoFocusOnAppearing)) {
 
 
-		// Is Being Attacked
-		if (CoolDown)
-		{
-			ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Under Attack by: %s", AttackerName);//Working
+			// Is Being Attacked
+			if (CoolDown)
+			{
+				ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Under Attack by: %s", AttackerName);//Working
+			}
+			else
+			{
+				ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Safe");
+			}
+
+
+
+			// Match Time
+			const char* Time = reinterpret_cast<const char*>(TimeRemaining);
+			ImGui::Text("Match Time: %s", Time);
+			ImGui::Text("Speed : %.2f", (LocalPlayer->VelocityByDirection.x * LocalPlayer->VelocityByDirection.x + LocalPlayer->VelocityByDirection.y * LocalPlayer->VelocityByDirection.y));
+
+			// Map Name
+			const char* Map = reinterpret_cast<const char*>(MapName);
+			if (Map[0] == 'a' && Map[1] == 'c' && Map[2] == '_')
+				ImGui::Text("Map: %s", Map);
+			else
+				ImGui::Text("Join A Game!");
+
+			ImGui::End();
 		}
-		else
-		{
-			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Safe");
-		}
-
-
-
-		// Match Time
-		const char* Time = reinterpret_cast<const char*>(TimeRemaining);
-		ImGui::Text("Match Time: %s", Time);
-		ImGui::Text("Speed : %.2f", (LocalPlayer->VelocityByDirection.x * LocalPlayer->VelocityByDirection.x + LocalPlayer->VelocityByDirection.y * LocalPlayer->VelocityByDirection.y));
-
-		// Map Name
-		const char* Map = reinterpret_cast<const char*>(MapName);
-		if (Map[0] == 'a' && Map[1] == 'c' && Map[2] == '_')
-			ImGui::Text("Map: %s", Map);
-		else
-			ImGui::Text("Join A Game!");
-
-		ImGui::End();
 	}
 
 	if (!ShowMenu) {
 		return;
 	}
 
-	if (ImGui::Begin("Sting", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
 
-		//Fix injecting on spectating ?
+	if (ImGui::Begin("Sting", nullptr, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize /*| ImGuiWindowFlags_AlwaysAutoResize*/)) {
 		ImGui::Text("Player State :");
 		ImGui::SameLine();
 		if (!*PRealLocalMode && *PRealHealth > 0)
-			ImGui::TextColored(ImVec4(0.0f, 1.0f, 0.0f, 1.0f), "Alive");//Working
+			ImGui::TextColored(Green4, "Alive");
 		else if (*PRealLocalMode == 1 && *PRealHealth < 0)
-			ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1.0f), "Spectating");//Gray
+			ImGui::TextColored(Gray4, "Spectating");
 		else if (*PRealLocalMode == 4) {
-			ImGui::TextColored(ImVec4(1.0f, 1.0f, 0.0f, 1.0f), "Editing Mode");//Yellow
+			ImGui::TextColored(Yellow4, "Editing Mode");
 		}
 		else
 		{
-			ImGui::TextColored(ImVec4(0.5f, 0.0f, 0.5f, 1.0f), "Disabled");//Working
+			ImGui::TextColored(ImVec4(0.5f, 0.0f, 0.5f, 1.0f), "Disabled");
 		}
 
 
@@ -492,8 +394,7 @@ void Menu::RenderM()
 		{
 			//Esp Tab
 			if (ImGui::BeginTabItem("ESP")) {
-				// Left side - Aimbot and Marco checkboxes (Sub-tabs)
-				if (ImGui::BeginChild("##EspSideNav", ImVec2(150, 300), true)) {
+				if (ImGui::BeginChild("##EspSideNav", ImVec2(150, 300))) {
 					ImGui::Checkbox("Box", &Settings::ESP::bBoxes);
 					ImGui::Checkbox("Bones", &Settings::ESP::bBones);
 					ImGui::Checkbox("Lines", &Settings::ESP::bSnapLines);
@@ -509,25 +410,24 @@ void Menu::RenderM()
 
 				VerticalSeperator();
 
-				// Right side - Main content area
-				if (ImGui::BeginChild("##MainEspContent", ImVec2(350, 300), true)) {
+				if (ImGui::BeginChild("##MainEspContent", ImVec2(350, 300))) {
 					//Boxes
 					if (Settings::ESP::bBoxes) {
-						if (ImGui::CollapsingHeader("Boxes", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+						if (ImGui::CollapsingHeader("Boxes", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit3("Box Color", (float*)&Settings::ESP::BoxC.Value);
 						}
 					}
 
 					//Bones
 					if (Settings::ESP::bBones) {
-						if (ImGui::CollapsingHeader("Bones", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+						if (ImGui::CollapsingHeader("Bones",ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit3("Bone Color", (float*)&Settings::ESP::BoneC.Value);
 						}
 					}
 
 					// Lines section
 					if (Settings::ESP::bSnapLines) {
-						if (ImGui::CollapsingHeader("Lines", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+						if (ImGui::CollapsingHeader("Lines", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::ColorEdit3("Line Color", (float*)&Settings::ESP::SnapLinesC.Value);
 							ImGui::Combo("Line Position", &Settings::ESP::EspLineIndex, Settings::ESP::SnapLinePosition, IM_ARRAYSIZE(Settings::ESP::SnapLinePosition));
 						}
@@ -535,24 +435,19 @@ void Menu::RenderM()
 
 					ImGui::EndChild();
 				}
-				//}
 				ImGui::EndTabItem();
 			}
 
 			// Gun Tab
 			if (ImGui::BeginTabItem("Player"))
 			{
-				if (ImGui::BeginChild("##GunSideNav", ImVec2(150, 300), true)) {
+				if (ImGui::BeginChild("##GunSideNav", ImVec2(150, 300))) {
 					if (ImGui::Checkbox("No Recoil", &Settings::GunCheats::bNoRecoil))
 						GunCheats::NoRecoil();
 					if (ImGui::Checkbox("Rapid Fire", &Settings::GunCheats::bRapidFire))
 						GunCheats::RapidFire();
 					if (ImGui::Checkbox("No Gravity", &Settings::PlayerCheats::NoGravityState))
 						PlayerCheats::NoGravity();
-					if (ImGui::Checkbox("One Shot Kill (Offline)", &Settings::GunCheats::bOneShotKill))
-						GunCheats::OneShotKill();
-					if (ImGui::Checkbox("Infinite Ammo (Offline)", &Settings::GunCheats::bInfiniteAmmo))
-						GunCheats::InfAmmo();
 					if (ImGui::Checkbox("Speed Hack V1", &Settings::PlayerCheats::SpeedHack)) {
 						if (!Settings::PlayerCheats::SpeedHack) {
 							VirtualProtect(Speed, 0x4, PAGE_EXECUTE_READWRITE, &OLD);
@@ -563,6 +458,11 @@ void Menu::RenderM()
 							VirtualProtect(Speed, 0x4, PAGE_EXECUTE_READWRITE, &OLD);
 						}
 					}
+					ImGui::Separator();
+					if (ImGui::Checkbox("One Shot Kill (Offline)", &Settings::GunCheats::bOneShotKill))
+						GunCheats::OneShotKill();
+					if (ImGui::Checkbox("Infinite Ammo (Offline)", &Settings::GunCheats::bInfiniteAmmo))
+						GunCheats::InfAmmo();
 
 					//if (ImGui::Checkbox("NoClip (Offline)", &Settings::PlayerCheats::NoClipState))
 						//PlayerCheats::NoClip(); //Work on it, It  triggers
@@ -571,31 +471,38 @@ void Menu::RenderM()
 				}
 				VerticalSeperator();
 
-				if (ImGui::BeginChild("##MainGunContent", ImVec2(350, 300), true)) {
+				if (ImGui::BeginChild("##MainGunContent", ImVec2(350, 300))) {
 
 					if (Settings::PlayerCheats::SpeedHack) {
-						ImGui::SliderFloat("Speed##Slider", Speed, 0.001f, 0.006000000354f, "%.7f", ImGuiSliderFlags_NoInput);
+						ImGui::SliderFloat("Speed##Slider", Speed, 0.001f, 0.006000000354f, "%.4f", ImGuiSliderFlags_NoInput);
 					}
 					ImGui::EndChild();
 				}
 				ImGui::EndTabItem();
 			}
 
-			// Aimbot Tab
+			// Aim Features Tab
 			if (ImGui::BeginTabItem("Aim"))
 			{
-				if (ImGui::BeginChild("##AimSideNav", ImVec2(150, 300), true)) {
+				if (ImGui::BeginChild("##AimSideNav", ImVec2(150, 300))) {
 					ImGui::Checkbox("Aimbot", &Settings::Aimbot::bAimbot);
-					ImGui::Checkbox("Silent Aim", &Settings::Silent::bSilent);
-					ImGui::Checkbox("WallBang", &Settings::WallBang::bWallBang);
+					if (ImGui::Checkbox("WallBang", &Settings::WallBang::bWallBang)) {
+						if (!Settings::WallBang::bWallBang) {
+							Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c18), (BYTE*)"\xF3\x0F\x11\x05\x64\x20\x59\x00", 8u);
+							Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c4e), (BYTE*)"\xF3\x0F\x11\x0D\x68\x20\x59\x00", 8u);
+							Memory::Patch((BYTE*)(Constants::AcModuleBase + 0x56c56), (BYTE*)"\xF3\x0F\x11\x2D\x6C\x20\x59\x00", 8u);
+							Memory::Patch((BYTE*)(Constants::AcModuleBase + 0xcd506), (BYTE*)"\x66\x0F\xD6\x06", 4u);
+						}
+					}
+					//ImGui::Checkbox("Silent Aim", &Settings::Silent::bSilent);
 					ImGui::EndChild();
 				}
 
 				VerticalSeperator();
 
-				if (ImGui::BeginChild("##MainAimContent", ImVec2(350, 300), true)) {
+				if (ImGui::BeginChild("##MainAimContent", ImVec2(350, 300))) {
 					if (Settings::Aimbot::bAimbot) {
-						if (ImGui::CollapsingHeader("Aimbot", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+						if (ImGui::CollapsingHeader("Aimbot",ImGuiTreeNodeFlags_DefaultOpen)) {
 
 							ImGui::Combo("Aimbot Type", &Settings::Aimbot::AimbotTypeIndex, Settings::Aimbot::AimbotTypes, IM_ARRAYSIZE(Settings::Aimbot::AimbotTypes));
 							ImGui::Combo("Aim Location", &Settings::Aimbot::AimbotHitPosIndex, Settings::AimLocations, IM_ARRAYSIZE(Settings::AimLocations));
@@ -605,48 +512,24 @@ void Menu::RenderM()
 
 							if (Settings::Aimbot::AimbotTypeIndex == 1) {
 								Settings::Aimbot::bAimbotFOV = true;
+
 								ImGui::ColorEdit3("FOV Color", (float*)&Settings::Aimbot::AimbotFOVC.Value);
 								ImGui::SliderFloat("FOV##slider", &Settings::Aimbot::AimbotFOV, 30.0f, 250.0f, "%.1f", ImGuiSliderFlags_NoInput);
-								/*if (ImGui::TreeNodeEx("Aimbot FOV", ImGuiTreeNodeFlags_DefaultOpen)) {
-									ImGui::TreePop();
-								}*/
-							}
-							ImGui::Checkbox("Aim Line", &Settings::Aimbot::bAimbotAimLine);
-							if (Settings::Aimbot::bAimbotAimLine) {
-								ImGui::ColorEdit3("AimLine Color", (float*)&Settings::Aimbot::AimbotAimLineC.Value);
-								/*if (ImGui::TreeNodeEx("Aimbot Aim Line",ImGuiTreeNodeFlags_DefaultOpen)) {
-									ImGui::TreePop();
-								}*/
+
+								ImGui::Checkbox("Aim Line", &Settings::Aimbot::bAimbotAimLine);
+								if (Settings::Aimbot::bAimbotAimLine) {
+									ImGui::ColorEdit3("AimLine Color", (float*)&Settings::Aimbot::AimbotAimLineC.Value);
+								}
 							}
 							ImGui::Checkbox("Smoothness", &Settings::Aimbot::bSmoothness);
 
 							if (Settings::Aimbot::bSmoothness) {
 								ImGui::SliderFloat("Smoothnes##slider", &Settings::Aimbot::Smoothness, 1.0f, 0.1f, "%.2f", ImGuiSliderFlags_NoInput);
-								/*if (ImGui::TreeNodeEx("Aimbot Smoothness", ImGuiTreeNodeFlags_DefaultOpen)) {
-									ImGui::TreePop();
-								}*/
-							}
-						}
-					}
-					if (Settings::Silent::bSilent) {
-						if (ImGui::CollapsingHeader("Silent", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
-							ImGui::Combo("Silent Hit Location", &Settings::Silent::SilentAimHitPosIndex, Settings::AimLocations, IM_ARRAYSIZE(Settings::AimLocations));
-							Menu::Hotkey("Silent Aim Key", &Settings::Silent::SilentKey, ImVec2(50, 30));
-
-							ImGui::Checkbox("Silent FOV", &Settings::Silent::bSilentFOV);
-							if (Settings::Silent::bSilentFOV) {
-								ImGui::SliderFloat("FOV##SilentFov", &Settings::Silent::SilentFov, 30.0f, 250.0f, "%.1f");
-								ImGui::ColorEdit3("FOV Color##SilentFovColor", (float*)&Settings::Silent::SilentFovC.Value);
-							}
-
-							ImGui::Checkbox("AimLine##SilentAimLine", &Settings::Silent::bSilentAimLine);
-							if (Settings::Silent::bSilentAimLine) {
-								ImGui::ColorEdit3("AimLine Color##SilentAimLineColor", (float*)&Settings::Silent::SilentAimLineC.Value);
 							}
 						}
 					}
 					if (Settings::WallBang::bWallBang) {
-						if (ImGui::CollapsingHeader("WallBang", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+						if (ImGui::CollapsingHeader("WallBang", ImGuiTreeNodeFlags_DefaultOpen)) {
 							ImGui::Combo("WallBang Hit Location", &Settings::WallBang::WallBangHitPosIndex, Settings::AimLocations, IM_ARRAYSIZE(Settings::AimLocations));
 							Menu::Hotkey("WallBang Aim Key", &Settings::WallBang::WallBangKey, ImVec2(50, 30));
 
@@ -663,124 +546,65 @@ void Menu::RenderM()
 							}
 						}
 					}
+					// TODO
+					//if (Settings::Silent::bSilent) {
+					//	if (ImGui::CollapsingHeader("Silent", ImGuiTreeNodeFlags_CollapsingHeader | ImGuiTreeNodeFlags_DefaultOpen)) {
+					//		ImGui::Combo("Silent Hit Location", &Settings::Silent::SilentAimHitPosIndex, Settings::AimLocations, IM_ARRAYSIZE(Settings::AimLocations));
+					//		Menu::Hotkey("Silent Aim Key", &Settings::Silent::SilentKey, ImVec2(50, 30));
+					//		ImGui::Checkbox("Silent FOV", &Settings::Silent::bSilentFOV);
+					//		if (Settings::Silent::bSilentFOV) {
+					//			ImGui::SliderFloat("FOV##SilentFov", &Settings::Silent::SilentFov, 30.0f, 250.0f, "%.1f");
+					//			ImGui::ColorEdit3("FOV Color##SilentFovColor", (float*)&Settings::Silent::SilentFovC.Value);
+					//		}
+					//		ImGui::Checkbox("AimLine##SilentAimLine", &Settings::Silent::bSilentAimLine);
+					//		if (Settings::Silent::bSilentAimLine) {
+					//			ImGui::ColorEdit3("AimLine Color##SilentAimLineColor", (float*)&Settings::Silent::SilentAimLineC.Value);
+					//		}
+					//	}
+					//}
 					ImGui::EndChild();
 				}
 				ImGui::EndTabItem();
 			}
 
 			//Misc Tab
-			if (ImGui::BeginTabItem("Misc"))
-			{
+			if (ImGui::BeginTabItem("Misc")) {
+				if (ImGui::BeginChild("##MiscSideNav", ImVec2(150, 300))) {
+					//if (ImGui::Checkbox("Hook Trace Shoot", &bTrace));
 
-				if (ImGui::BeginChild("##MiscSideNav", ImVec2(150, 300), true)) {
-					//TESTING
-					if (ImGui::Checkbox("Hook Trace Shoot", &bTrace)) { //LOOk
-						if (!bTrace) {
-							if (MH_CreateHook((LPVOID)Hooks::TraceShootWrapperTar, (LPVOID)Hooks::TraceShootWrapperH, (LPVOID*)&Hooks::TraceShootWrapperO) != MH_OK) {
-								std::cout << "[Failed] Hooking WhoIsShooting!\n";
-								Menu::CleanAndExit();
-							}
-							if (MH_EnableHook((LPVOID)Hooks::TraceShootWrapperTar) != MH_OK) { // Enables The Hook
-								std::cerr << "[Error] Failed to enable WhoIsShooting Hooks!\n";
-								Menu::CleanAndExit();
-							}
-							bTrace = true;
-						}
-					}
-
-					if (ImGui::Checkbox("Disable Effects (Fast Mode)", &Settings::PlayerCheats::ParticlesState))
+					if (ImGui::Checkbox("Disable Effects", &Settings::PlayerCheats::ParticlesState))
 						PlayerCheats::DisableParticles();
-					ImGui::Checkbox("FOV", &Settings::PlayerCheats::FovChanger);
+					if (ImGui::Checkbox("FOV", &Settings::PlayerCheats::FovChanger))
+						if(!Settings::PlayerCheats::FovChanger)
+							*FOV = 120.0f;
 					ImGui::Checkbox("GameInfo", &Settings::PlayerCheats::GameInfo);
 
 					ImGui::EndChild();
 				}
-				if (ImGui::BeginChild("##MainMiscContent", ImVec2(300, 300), true)) {
-					if(Settings::PlayerCheats::FovChanger)
-						ImGui::SliderFloat("FOV", FOV, 80.0f, 155.0f, "%.1f", ImGuiSliderFlags_NoInput);
+
+				VerticalSeperator();
+
+				if (ImGui::BeginChild("##MainMiscContent", ImVec2(350, 300))) {
+
+					if (Settings::PlayerCheats::FovChanger)
+						ImGui::SliderFloat("FOV", FOV, 80.0f, 150.0f, "%.1f", ImGuiSliderFlags_NoInput);
 					ImGui::EndChild();
 				}
-
 				ImGui::EndTabItem();
 			}
-
-
-			//// WallBang Tab
-			//if (ImGui::BeginTabItem("WallBang")) {
-			//	ImGui::Combo("Aim Type", &Settings::AimFeaturesIndex, Settings::AimFeatures, IM_ARRAYSIZE(Settings::AimFeatures));
-			//	//SilentAim
-			//	if (Settings::AimFeaturesIndex == 0) {
-			//		//if (Settings::Silent::bSilent) 
-			//		Settings::Silent::bSilent = true;
-			//		if (Settings::Aimbot::AimbotKey == Settings::Silent::SilentKey) {
-			//			Settings::Aimbot::bAimbot = false;
-			//		}
-			//		ImGui::Combo("Silent Aim Location", &Settings::Silent::SilentAimHitPosIndex, Settings::AimLocations, IM_ARRAYSIZE(Settings::AimLocations));
-
-			//		Menu::Hotkey("Silent Aim Key", &Settings::Silent::SilentKey, ImVec2(50, 30));
-
-			//		ImGui::SliderFloat("FOV##slider1", &Settings::Silent::SilentFov, 30.0f, 250.0f, "%.1f");
-			//		ImGui::ColorEdit3("FOV Color##Color", (float*)&Settings::Silent::SilentFovC.Value);
-
-			//		ImGui::Checkbox("AimLine##checkbox", &Settings::Silent::bSilentAimLine);
-			//		if (Settings::Silent::bSilentAimLine) {
-			//			ImGui::ColorEdit3("AimLine Color##Color", (float*)&Settings::Silent::SilentAimLineC.Value);
-			//		}
-			//		//}
-			//	}
-			//	else
-			//		Settings::Silent::bSilent = false;
-			//	if (Settings::AimFeaturesIndex == 1) {
-			//		//WallBang
-			//		//if(Settings::WallBang::bWallBang){
-			//		Settings::WallBang::bWallBang = true;
-			//		if (Settings::Aimbot::AimbotKey == Settings::WallBang::WallBangKey) {
-			//			Settings::Aimbot::bAimbot = false;
-			//		}
-			//		else if (Settings::Silent::SilentKey == Settings::WallBang::WallBangKey) {
-			//			Settings::Silent::bSilent = false;
-			//		}
-			//		ImGui::Combo("Bang Location", &Settings::WallBang::WallBangHitPosIndex, Settings::AimLocations, IM_ARRAYSIZE(Settings::AimLocations));
-
-			//		Menu::Hotkey("WallBang Key", &Settings::WallBang::WallBangKey, ImVec2(50, 30));
-
-			//		ImGui::SliderFloat("FOV##slider", &Settings::WallBang::WallBangFOV, 30.0f, 250.0f, "%.1f");
-			//		ImGui::ColorEdit3("FOV Color", (float*)&Settings::WallBang::WallBangFOVC.Value);
-
-			//		ImGui::Checkbox("AimLine", &Settings::WallBang::bWallBangAimLine);
-			//		if (Settings::WallBang::bWallBangAimLine) {
-			//			ImGui::ColorEdit3("AimLine Color", (float*)&Settings::WallBang::WallBangAimLineC.Value);
-			//		}
-			//		//}
-			//	}
-			//	else
-			//		Settings::WallBang::bWallBang = false;
-			//	ImGui::EndTabItem();
-			//}
-
-
 
 			ImGui::EndTabBar();
 		}
 
-
 		if (*PRealLocalMode)
 			ImGui::EndDisabled();
-		ImGui::End();
+		
 	}
+	ImGui::End();
 }
-
-
-void Menu::ToggleMenu()
-{
-	ShowMenu = !ShowMenu;
-}
-
-
 
 //Main Loop
-BOOL __stdcall Hooks::SwapBuffersH(HDC hdc) { // MAIN LOOP
-
+BOOL __stdcall Hooks::SwapBuffersH(HDC hdc) {
 	Menu::GameConext = wglGetCurrentContext();
 	if (!Menu::ImguiDone) {
 		Menu::Init();
@@ -790,51 +614,52 @@ BOOL __stdcall Hooks::SwapBuffersH(HDC hdc) { // MAIN LOOP
 		Menu::SetupContext(hdc);
 	wglMakeCurrent(hdc, Menu::MenuContext);
 
+	//Aimbot KeyCheck
+	if (Settings::Aimbot::bAimbot) {
+
+		if (Settings::Aimbot::AimbotKey != 0) {
+			if (GetAsyncKeyState(Settings::Aimbot::AimbotKey)) {
+				Settings::Aimbot::bAimbotState = true;
+				Aimbot::ActivateAimbot();
+			}
+			else
+				Settings::Aimbot::bAimbotState = false;
+		}
+		else {
+			Settings::Aimbot::bAimbotState = true;
+			Aimbot::ActivateAimbot();
+		}
+	}
+
 	Menu::StartRender();
 
-	// Aimbot
-	if(Settings::Aimbot::bAimbot) {
 
-		if (Settings::Aimbot::AimbotKey == 0) {
-			if (Settings::Aimbot::bAimbotAimLine)
-				Cheat::SnapAimLine(Aimbotted, Settings::Aimbot::AimbotAimLineC,&Settings::Aimbot::AimbotFOV);
-		}
-		else if(!Constants::ChoosingAimbotKey){
-			if (Settings::Aimbot::bAimbotAimLine)
-				Cheat::SnapAimLine(Aimbotted, Settings::Aimbot::AimbotAimLineC, &Settings::Aimbot::AimbotFOV);
-		}
-	}
-	//WallBang
+	//WallBang SnapLine
 	if (Settings::WallBang::bWallBang && Settings::WallBang::bWallBangAimLine) {
-		if (Settings::WallBang::WallBangKey == 0) { // No Custom WallBang Key
+		if (Settings::WallBang::bWallBangFOV)
 			Cheat::SnapAimLine(WallBanged, Settings::WallBang::WallBangAimLineC, &Settings::WallBang::WallBangFOV);
-
-		}
-		else if (Settings::WallBang::bWallBangState/* && Constants::WallBangNopped*/) { // Custom Key!
-			Cheat::SnapAimLine(WallBanged, Settings::WallBang::WallBangAimLineC, &Settings::WallBang::WallBangFOV);
-
-		}
+		else
+			Cheat::SnapAimLine(WallBanged, Settings::WallBang::WallBangAimLineC);
 	}
 
-	//Silent Key Check
-	if (Settings::Silent::bSilent) {
-		if (Settings::Silent::SilentKey == 0) { // No Custom Silent Key
-			if (Settings::Silent::bSilentAimLine) {
-				Silent::AimLine(Silented);
-			}
-
-		}
-		else if (!Constants::ChoosingSilentKey) { // Custom Key!
-			if (Settings::Silent::bSilentAimLine) {
-				Silent::AimLine(Silented);
-			}
-		}
+	// Aimbot SnapLine
+	if (Settings::Aimbot::bAimbot && Settings::Aimbot::bAimbotAimLine) {
+		if (Settings::Aimbot::bAimbotFOV && Settings::Aimbot::AimbotTypeIndex == 1)
+			Cheat::SnapAimLine(Aimbotted, Settings::Aimbot::AimbotAimLineC, &Settings::Aimbot::AimbotFOV);
+		else if(Settings::Aimbot::AimbotTypeIndex == 1)
+			Cheat::SnapAimLine(Aimbotted, Settings::Aimbot::AimbotAimLineC);
 	}
+
+	WallBanged = nullptr;
+	Aimbotted = nullptr;
+
+	Menu::RenderM();
 
 	ImGui::Render();
 	ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 
 	wglMakeCurrent(hdc, Menu::GameConext);
+
 	return Hooks::SwapBuffersO(hdc);
 }
 
@@ -934,13 +759,10 @@ void Menu::CleanAndExit() {
 	MH_Uninitialize();
 
 	// Close the debug console
-	fclose(stdout);
-	fclose(stdin);
-	fclose(stderr);
-	FreeConsole();
-	//if(Settings::Aimbot::bAimbotState)
-	//	if(Aimbot::AimbotThread.joinable())
-	//		Aimbot::AimbotThread.join();
+	//fclose(stdout);
+	//fclose(stdin);
+	//fclose(stderr);
+	//FreeConsole();
 
 	// Unload the DLL
 	FreeLibraryAndExitThread(Constants::AimbotHandle, 0);

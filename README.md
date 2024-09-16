@@ -43,3 +43,7 @@ If you enjoy using Sting, please consider giving this repo a star 🌟! Feedback
 ****📄 License****
 
 **Sting is licensed under the MIT License.**
+---
+For Contact:
+
+****DISCORD : dotech****      

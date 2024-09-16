@@ -1,99 +1,45 @@
 # 🦂 Sting - AssaultCube Cheat
 
 
-**Sting** is a powerful, customizable cheat for **AssaultCube**, designed for players who want to gain an edge with features like aimbot, ESP, no recoil, and more. Whether you're new to game hacking or a seasoned player, Sting offers a sleek, feature-rich experience built on the latest frameworks.  
-
----
-
-## 🎮 Features
-
-- **Aimbot**  
-  Automatically locks onto enemies for maximum accuracy.
-  
-- **ESP (Extrasensory Perception)**  
-  See players through walls with customizable ESP options (box, health bars, names, etc.).
-  
-- **No Recoil**  
-  Fire your weapon without recoil for better accuracy.
-  
-- **Infinite Ammo**  
-  Never run out of ammo in the heat of battle.
-  
-- **Rapid Fire**  
-  Increase your firing rate beyond normal limits.
-  
-- **One-Shot Kill**  
-  Take down enemies with a single shot, regardless of the weapon.
-
-- **Crosshair Customization**  
-  Change the appearance and style of your in-game crosshair for better precision.
-
-- **ImGui Cheat Menu**  
-  Easily enable or disable features on the fly using the stylish, customizable ImGui menu.
-
----
-
-## ⚙️ Setup & Installation
-
-### Prerequisites
-- Windows OS
-- AssaultCube installed (latest version)
-- Visual Studio or any C++ IDE
-- **DirectX SDK** or **OpenGL** development libraries
-- **ImGui** (included in this repo)
+**Sting** is a powerful, customizable cheat for **AssaultCube**, designed for developers who want to gain some knowledge to get started in game hacking, with features like aimbot, ESP, no recoil, and more
 
 ### Installation Steps
 
 1. **Clone the Repository**  
    ```bash
-   git clone https://github.com/your-username/Sting-AssaultCube-Cheat.git
+   git clone https://github.com/Dotechs/Sting-AssaultCube-Internal.git
    cd Sting-AssaultCube-Cheat
 Open the Project
 Open the solution (.sln) file in Visual Studio.
 
-Configure Dependencies
-Ensure you have the DirectX SDK or OpenGL installed. You can adjust the graphics API in the settings if needed.
+2. **Ensure you have OpenGL installed.**
 
-Compile the Project
-Build the project in Release mode for better performance:
+3. **Compile the Project**
 
-bash
-Copy code
-Build -> Build Solution
-Inject the Cheat
-After building, you can use any DLL injector of your choice to inject the resulting .dll into the game. For example, use Xenos Injector or Extreme Injector.
+After building, you can use any DLL injector of your choice to inject the resulting .dll into the game.
 
-🕹️ Usage
-Launch AssaultCube.
-Use your favorite injector to inject the compiled Sting.dll into the AssaultCube process.
-Press INSERT to open the ImGui Menu and toggle features on or off.
-Customize your settings, play, and dominate the battlefield!
-🚀 Features Breakdown
-Aimbot Settings:
+---
+### Usage :
 
-FOV: Adjustable radius to target enemies within your field of view.
-Smoothing: Customize the smoothness of the aimbot for natural-looking movement.
-ESP Settings:
+**Insert** -> **Toggle The Menu**
 
-Show player boxes
-Health bars
-Weapon info
-Distance markers
-Miscellaneous:
+**End** -> **Clean And eject the DLL**
 
-Enable/Disable infinite ammo, no recoil, and rapid fire.
-Adjustable one-shot kill parameters for specific weapon types.
-Customizable hotkeys for quick toggling of cheat features.
-⚠️ Disclaimer
+
+****Note: You can't use same key for 2 Aim Features!****
+
+---
+****⚠️ Disclaimer****
+
 This cheat is for educational purposes only. The use of cheats in multiplayer games is typically against the terms of service of most games and may result in a ban. Use Sting at your own risk. The developers are not responsible for any damages or bans caused by the use of this software.
 
-🧑‍💻 Contributing
-We welcome contributions to improve Sting! Whether it's new features, bug fixes, or performance enhancements, feel free to submit a pull request or report issues.
 
-🌟 Support
+---
+****🌟 Support****
+
 If you enjoy using Sting, please consider giving this repo a star 🌟! Feedback and feature requests are always welcome.
 
-📄 License
-Sting is licensed under the MIT License.
+---
+****📄 License****
 
-Enjoy dominating the game with Sting! 🎯
+**Sting is licensed under the MIT License.**

@@ -1,0 +1,6 @@
+Package: imgui
+Feature: opengl2-binding
+Architecture: x64-windows
+Multi-Arch: same
+Description: Make available OpenGL (legacy) binding
+Status: install ok installed

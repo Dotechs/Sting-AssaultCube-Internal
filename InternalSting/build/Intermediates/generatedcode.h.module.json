@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "InternalSting\\build\\Intermediates\\GeneratedCode.h.obj",
+            "outputs": [
+                "X:\\Projects\\InternalSting\\InternalSting\\build\\Intermediates\\vc143.pdb",
+                "InternalSting\\build\\Intermediates\\",
+                "X:\\Projects\\InternalSting\\InternalSting\\build\\Intermediates\\GeneratedCode.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "src\\GeneratedCode.h",
+                    "source-path": "x:\\projects\\internalsting\\src\\generatedcode.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}
